@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { ChevronDown } from "lucide-react";
 import type { TimeSlots } from "../../../../model/TimeSlot";
 import APIBook from "../../api/book.api";
@@ -12,30 +12,31 @@ export default function BookingTablePage() {
     const [selectedTable, setSelectedTable] = useState<Table | null>(null);
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [selectedSlots, setSelectedSlots] = useState<TimeSlots[]>([]);
+    const [booked, setBooked] = useState<User_Book[]>([]);
     const token = localStorage.getItem("token");
-    const [booked, setBooked] = useState<User_Book[]>([])
+
     // ngày từ hôm nay tới 2 ngày sau
     const today = new Date();
     const dates: string[] = [];
     for (let i = 0; i <= 2; i++) {
         const d = new Date();
         d.setDate(today.getDate() + i);
-        dates.push(d.toLocaleDateString("vi-VN")); // dd/mm/yyyy
+
+        // chuẩn ISO YYYY-MM-DD
+        const formatted = d.toISOString().split("T")[0];
+        dates.push(formatted);
     }
+
 
     // fetch timeslot
     useEffect(() => {
         fetch(APIBook.getSlotTime, {
-            method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
         })
-            .then((res) => {
-                if (!res.ok) throw new Error("HTTP status " + res.status);
-                return res.json();
-            })
+            .then((res) => res.json())
             .then((data) => setTimeSlot(data.data))
             .catch((err) => console.log("Lỗi:", err));
     }, [token]);
@@ -43,37 +44,52 @@ export default function BookingTablePage() {
     // fetch table
     useEffect(() => {
         fetch(APITable.getTable, {
-            method: "GET",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
         })
-            .then((res) => {
-                if (!res.ok) throw new Error("HTTP status " + res.status);
-                return res.json();
-            })
+            .then((res) => res.json())
             .then((data) => setListTable(data.data))
             .catch((err) => console.log("Lỗi:", err));
-    }, []);
+    }, [token]);
 
+    // fetch booked table
     useEffect(() => {
+        if (!selectedDate) return; // chỉ gọi khi đã chọn ngày
+
+        // selectedDate có thể là string (YYYY-MM-DD) hoặc Date
+        const date = new Date(selectedDate);
+
+        // format chuẩn ISO: YYYY-MM-DD
+        const formatted = date.toISOString().split("T")[0]; // "2025-10-01"
+
+        console.log("Ngày gửi về BE:", formatted);
+
         fetch(APITable.getUserTable, {
-            method: "GET",
+            method: "POST", // POST để gửi body
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
+            body: JSON.stringify({ time_date: formatted }),
         })
             .then((res) => {
                 if (!res.ok) throw new Error("HTTP status " + res.status);
                 return res.json();
             })
             .then((data) => setBooked(data.data))
-            .catch((err) => console.log("Lỗi:", err));
-    }, []);
+            .catch((err) => console.error("Lỗi FE:", err));
+    }, [token, selectedDate]);
+
+    console.log("ngày được gửi về là : ", selectedDate)
     console.log("booked là : ", booked)
-    const bookedSlots = booked.flatMap(b => b.time_slot.map(id => id.toString()));
+
+    // gom hết slot đã đặt
+    const bookedSlots = useMemo(() => {
+        return booked.flatMap((b) => b.time_slot.map((id) => id.toString()));
+    }, [booked]);
+
     // toggle chọn/bỏ chọn slot
     const toggleSlot = (slot: TimeSlots) => {
         if (selectedSlots.some((s) => s._id === slot._id)) {
@@ -83,7 +99,7 @@ export default function BookingTablePage() {
         }
     };
 
-    // tổng tiền = giá bàn × số slot chọn
+    // tổng tiền
     const totalPrice =
         (selectedTable?.price || 0) * (selectedSlots.length || 0);
 
@@ -152,9 +168,9 @@ export default function BookingTablePage() {
                 <div className="mb-8 overflow-x-auto">
                     <div className="inline-block">
                         <div className="flex min-w-max mb-2">
-                            {timeslot.map((slot, idx) => (
+                            {timeslot.map((slot) => (
                                 <div
-                                    key={idx}
+                                    key={slot._id}
                                     className="w-24 text-xs font-semibold text-center text-gray-200"
                                 >
                                     {slot.start_time} - {slot.end_time}
@@ -162,23 +178,23 @@ export default function BookingTablePage() {
                             ))}
                         </div>
                         <div className="flex min-w-max">
-                            {timeslot.map((slot, idx) => {
-                                const isBooked = bookedSlots.includes(slot._id); // check đã đặt chưa
+                            {timeslot.map((slot) => {
+                                const isBooked = bookedSlots.includes(slot._id.toString());
                                 const isSelected = selectedSlots.some((s) => s._id === slot._id);
 
                                 return (
                                     <div
-                                        key={idx}
+                                        key={slot._id}
                                         className={`w-24 h-16 border border-gray-600 transition duration-200 
-          flex items-center justify-center text-sm rounded-md 
-          ${isBooked
-                                                ? "bg-red-600 cursor-not-allowed" // đã đặt -> đỏ
+                                            flex items-center justify-center text-sm rounded-md 
+                                            ${isBooked
+                                                ? "bg-red-600 cursor-not-allowed"
                                                 : isSelected
-                                                    ? "bg-green-600 cursor-pointer"   // đang chọn -> xanh lá
+                                                    ? "bg-green-600 cursor-pointer"
                                                     : "bg-gray-700 hover:bg-green-500 cursor-pointer"
                                             } text-white`}
                                         onClick={() => {
-                                            if (!isBooked) toggleSlot(slot); // chỉ cho click khi chưa booked
+                                            if (!isBooked) toggleSlot(slot);
                                         }}
                                     >
                                         {isBooked ? "Đã đặt" : isSelected ? "Đã chọn" : "Trống"}
@@ -200,9 +216,7 @@ export default function BookingTablePage() {
                         <span>Khung giờ :</span>
                         <span className="text-right">
                             {selectedSlots.length > 0
-                                ? selectedSlots
-                                    .map((s) => `${s.start_time}-${s.end_time}`)
-                                    .join(", ")
+                                ? selectedSlots.map((s) => `${s.start_time}-${s.end_time}`).join(", ")
                                 : "Chưa chọn"}
                         </span>
                         <span>Số bàn :</span>
