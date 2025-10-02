@@ -8,12 +8,14 @@ import type { User_Book } from "../../../../model/User_Book";
 
 export default function BookingTablePage() {
     const [listtable, setListTable] = useState<Table[]>([]);
-    const [timeslot, setTimeSlot] = useState<TimeSlots[]>([]);
+    const [timeslot, setTimeSlot] = useState<TimeSlots[]>([]); // dùng để fill ra thời gian trong database
     const [selectedTable, setSelectedTable] = useState<Table | null>(null);
     const [selectedDate, setSelectedDate] = useState<string>("");
     const [selectedSlots, setSelectedSlots] = useState<TimeSlots[]>([]);
-    const [booked, setBooked] = useState<User_Book[]>([]);
+    const [booked, setBooked] = useState<User_Book[]>([]); // fill ra bàn đã đặt rồi , ở đây tôi đặt tên sai
     const token = localStorage.getItem("token");
+    const [choicetable, setchoiceTable] = useState("") // lấy ra id đang chọn bàn nào
+    const [slotTime, setSlotTime] = useState<string[]>([]); // dùng để lưu lại những thời gian mà mình muốn đặt 
 
     // ngày từ hôm nay tới 2 ngày sau
     const today = new Date();
@@ -26,8 +28,6 @@ export default function BookingTablePage() {
         const formatted = d.toISOString().split("T")[0];
         dates.push(formatted);
     }
-
-
     // fetch timeslot
     useEffect(() => {
         fetch(APIBook.getSlotTime, {
@@ -40,7 +40,7 @@ export default function BookingTablePage() {
             .then((data) => setTimeSlot(data.data))
             .catch((err) => console.log("Lỗi:", err));
     }, [token]);
-
+    console.log("slot trong chương trình là : ", slotTime)
     // fetch table
     useEffect(() => {
         fetch(APITable.getTable, {
@@ -56,7 +56,7 @@ export default function BookingTablePage() {
 
     // fetch booked table
     useEffect(() => {
-        if (!selectedDate) return; // chỉ gọi khi đã chọn ngày
+        if (!selectedDate || !choicetable) return; // chỉ gọi khi đã chọn ngày
 
         // selectedDate có thể là string (YYYY-MM-DD) hoặc Date
         const date = new Date(selectedDate);
@@ -64,7 +64,6 @@ export default function BookingTablePage() {
         // format chuẩn ISO: YYYY-MM-DD
         const formatted = date.toISOString().split("T")[0]; // "2025-10-01"
 
-        console.log("Ngày gửi về BE:", formatted);
 
         fetch(APITable.getUserTable, {
             method: "POST", // POST để gửi body
@@ -72,7 +71,7 @@ export default function BookingTablePage() {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ time_date: formatted }),
+            body: JSON.stringify({ time_date: formatted, table_id: choicetable }),
         })
             .then((res) => {
                 if (!res.ok) throw new Error("HTTP status " + res.status);
@@ -80,10 +79,7 @@ export default function BookingTablePage() {
             })
             .then((data) => setBooked(data.data))
             .catch((err) => console.error("Lỗi FE:", err));
-    }, [token, selectedDate]);
-
-    console.log("ngày được gửi về là : ", selectedDate)
-    console.log("booked là : ", booked)
+    }, [token, selectedDate, choicetable]);
 
     // gom hết slot đã đặt
     const bookedSlots = useMemo(() => {
@@ -98,10 +94,48 @@ export default function BookingTablePage() {
             setSelectedSlots([...selectedSlots, slot]);
         }
     };
-
     // tổng tiền
     const totalPrice =
         (selectedTable?.price || 0) * (selectedSlots.length || 0);
+
+
+
+    const DatLich = () => {
+        if (!selectedDate || !choicetable || slotTime.length == 0) {
+            console.warn("⚠️ Chưa chọn ngày hoặc bàn hoặc thời gian");
+            return;
+        }
+
+        try {
+            const date = new Date(selectedDate);
+            const formatted = date.toISOString().split("T")[0]; // YYYY-MM-DD
+
+            fetch(APITable.postUserTable, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // nếu có auth
+                },
+                body: JSON.stringify({
+                    time_date: formatted,
+                    table_id: choicetable,
+                    slot_time: slotTime,
+                }),
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("HTTP status " + res.status);
+                    return res.json();
+                })
+                .then((data) => {
+                    console.log("✅ Đã thêm vào DB:", data);
+                    setBooked(data.data);
+                    alert("🎉 Đặt lịch thành công!");
+                })
+                .catch((err) => console.error("❌ Lỗi FE:", err));
+        } catch (err) {
+            console.error("❌ Lỗi format date:", err);
+        }
+    };
 
     return (
         <div
@@ -122,10 +156,12 @@ export default function BookingTablePage() {
                 <div className="mb-6 relative">
                     <select
                         value={selectedTable?._id || ""}
-                        onChange={(e) =>
+                        onChange={(e) => {
                             setSelectedTable(
                                 listtable.find((t) => t._id === e.target.value) || null
-                            )
+                            );
+                            setchoiceTable(e.target.value)
+                        }
                         }
                         className="appearance-none w-full bg-black/40 text-white p-4 rounded-lg cursor-pointer pr-10 border border-white/20 focus:ring-2 focus:ring-green-400"
                     >
@@ -195,6 +231,8 @@ export default function BookingTablePage() {
                                             } text-white`}
                                         onClick={() => {
                                             if (!isBooked) toggleSlot(slot);
+                                            setSlotTime((prev) => [...prev, slot._id]);
+
                                         }}
                                     >
                                         {isBooked ? "Đã đặt" : isSelected ? "Đã chọn" : "Trống"}
@@ -242,11 +280,11 @@ export default function BookingTablePage() {
                     >
                         Tạo lại
                     </button>
-                    <button className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-md transition duration-300">
+                    <button className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-md transition duration-300" onClick={DatLich}>
                         Đặt lịch
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
