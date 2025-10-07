@@ -10,6 +10,8 @@ import ProfilePage from './component/User/Layout/Profile/ProfilePage'
 import BookDetail from './component/User/Layout/BookDetail/BookDetail'
 import FavoriteBooks from './component/User/Layout/FavoriteBooks/FavoriteBooks'
 import BorrowHistory from './component/User/Layout/BorrowHistory/BorrowHistory'
+import AddBookForm from './component/User/Layout/AddBook/AddBook'
+import ViewAllBooksForm from './component/User/Layout/AddBook/ViewAllBooks'
 function App() {
 
   return (
@@ -61,7 +63,7 @@ function App() {
                 <Footer />
               </>
             }
-          />
+          />   
           <Route
             path="/borrowhistory"
             element={
@@ -72,6 +74,8 @@ function App() {
               </>
             }
           />
+          <Route path="/AddBook" element={<AddBookForm/>}/>
+          <Route path="/ViewAllBooks" element={<ViewAllBooksForm/>}/>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
