@@ -40,7 +40,6 @@ export default function BookingTablePage() {
             .then((data) => setTimeSlot(data.data))
             .catch((err) => console.log("Lỗi:", err));
     }, [token]);
-    console.log("slot trong chương trình là : ", slotTime)
     // fetch table
     useEffect(() => {
         fetch(APITable.getTable, {
@@ -200,9 +199,12 @@ export default function BookingTablePage() {
                     </div>
                 </div>
 
+
+                {/* đừng có động vào */}
                 {/* time slots */}
                 <div className="mb-8 overflow-x-auto">
                     <div className="inline-block">
+                        {/* header row */}
                         <div className="flex min-w-max mb-2">
                             {timeslot.map((slot) => (
                                 <div
@@ -213,35 +215,58 @@ export default function BookingTablePage() {
                                 </div>
                             ))}
                         </div>
+
+                        {/* slot row */}
                         <div className="flex min-w-max">
                             {timeslot.map((slot) => {
                                 const isBooked = bookedSlots.includes(slot._id.toString());
                                 const isSelected = selectedSlots.some((s) => s._id === slot._id);
 
+                                // check luôn trong return
+                                const now = new Date();
+                                const todayStr = now.toISOString().split("T")[0];
+                                let isPast = false;
+                                if (selectedDate === todayStr) {
+                                    const [h, m] = slot.start_time.split(":").map(Number);
+                                    const slotTime = new Date();
+                                    slotTime.setHours(h, m, 0, 0);
+                                    if (slotTime < now) isPast = true;
+                                }
+
                                 return (
                                     <div
                                         key={slot._id}
                                         className={`w-24 h-16 border border-gray-600 transition duration-200 
-                                            flex items-center justify-center text-sm rounded-md 
-                                            ${isBooked
+                            flex items-center justify-center text-sm rounded-md 
+                            ${isBooked
                                                 ? "bg-red-600 cursor-not-allowed"
-                                                : isSelected
-                                                    ? "bg-green-600 cursor-pointer"
-                                                    : "bg-gray-700 hover:bg-green-500 cursor-pointer"
+                                                : isPast
+                                                    ? "bg-gray-500 cursor-not-allowed"
+                                                    : isSelected
+                                                        ? "bg-green-600 cursor-pointer"
+                                                        : "bg-gray-700 hover:bg-green-500 cursor-pointer"
                                             } text-white`}
                                         onClick={() => {
-                                            if (!isBooked) toggleSlot(slot);
-                                            setSlotTime((prev) => [...prev, slot._id]);
-
+                                            if (!isBooked && !isPast) {
+                                                toggleSlot(slot);
+                                                setSlotTime((prev) => [...prev, slot._id]);
+                                            }
                                         }}
                                     >
-                                        {isBooked ? "Đã đặt" : isSelected ? "Đã chọn" : "Trống"}
+                                        {isBooked
+                                            ? "Đã đặt"
+                                            : isPast
+                                                ? "Hết giờ"
+                                                : isSelected
+                                                    ? "Đã chọn"
+                                                    : "Trống"}
                                     </div>
                                 );
                             })}
                         </div>
                     </div>
                 </div>
+
 
                 {/* booking info */}
                 <div className="bg-black/50 p-6 rounded-lg mb-8">

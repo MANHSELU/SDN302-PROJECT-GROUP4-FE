@@ -1,12 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ShoppingCart, Minus, Plus, Star } from "lucide-react";
 import { useParams } from "react-router-dom";
+import type { Books } from "../../../../model/Books";
+import APIBook from "../../api/book.api";
 
 function BookDetail() {
     const [quantity, setQuantity] = useState(1);
     const { slug } = useParams();
-    console.log("slug là : ", slug);
+    const [BookDetail, setBookDetail] = useState<Books>();
+    const [mainImage, setMainImage] = useState<string | null>(null); // 👉 thêm state
 
+    useEffect(() => {
+        if (!slug) return;
+
+        fetch(`${APIBook.getBookDEtail}/${slug}`)
+            .then((res) => {
+                if (!res.ok) throw new Error("Lỗi khi fetch book detail");
+                return res.json();
+            })
+            .then((data) => {
+                setBookDetail(data);
+                if (data.image?.length > 0) {
+                    setMainImage(data.image[0]); // mặc định lấy ảnh đầu tiên
+                }
+            })
+            .catch((err) => console.error("❌ Lỗi fetch:", err));
+    }, [slug]);
     return (
         <div
             className="relative min-h-screen bg-cover bg-center text-slate-100 p-12 flex justify-center"
@@ -28,34 +47,51 @@ function BookDetail() {
                     <div>
                         <h1 className="text-3xl font-bold mb-10 text-center">📖 Chi Tiết Sách</h1>
 
-                        <div className="w-full h-96 bg-slate-700 rounded-xl mb-6 shadow-lg"></div>
-                        <div className="flex gap-4">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div
-                                    key={i}
-                                    className="w-28 h-24 bg-slate-700 rounded-lg shadow-md hover:scale-105 transition-transform"
-                                ></div>
-                            ))}
-                        </div>
+                        {/* ảnh chính */}
+                        {BookDetail && mainImage && (
+                            <img
+                                src={mainImage}
+                                alt={BookDetail.title}
+                                className="w-full h-96 object-cover rounded-xl mb-6 shadow-lg transition-opacity duration-300"
+                            />
+                        )}
+
+                        {/* thumbnail */}
+                        {BookDetail && (
+                            <div className="flex gap-4">
+                                {BookDetail.image.map((i) => (
+                                    <img
+                                        key={i}
+                                        src={i}
+                                        alt={BookDetail.title}
+                                        onClick={() => setMainImage(i)} // 👉 click đổi ảnh
+                                        className={`w-28 h-24 object-cover rounded-lg shadow-md cursor-pointer transition-transform mx-1 ${mainImage === i
+                                            ? "ring-4 ring-yellow-400 scale-105"
+                                            : "hover:scale-105"
+                                            }`}
+                                    />
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Thông tin sách */}
                     <div className="flex flex-col justify-start mt-20">
-                        <h2 className="text-4xl font-bold mb-4 text-yellow-400">Tiêu đề Sách</h2>
+                        <h2 className="text-4xl font-bold mb-4 text-yellow-400">{BookDetail && BookDetail.title}</h2>
                         <p className="text-slate-300 mb-6 text-lg leading-relaxed">
-                            Đây là mô tả ngắn về sách. Nội dung thú vị, hấp dẫn, và mang tính học
-                            thuật cao.
+                            {BookDetail && BookDetail.decription}
                         </p>
 
                         <p className="text-xl font-medium mb-8">
                             Giá:{" "}
                             <span className="text-4xl font-extrabold text-yellow-400">
-                                100.000.000 VND
+                                {BookDetail && BookDetail.price} VND
                             </span>
                         </p>
 
                         {/* Số lượng + Mua */}
                         <div className="flex items-center gap-4">
+                            {/* Giảm số lượng */}
                             <button
                                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                                 className="bg-slate-700 p-3 rounded-full hover:bg-slate-600 hover:scale-110 transition"
@@ -63,21 +99,29 @@ function BookDetail() {
                                 <Minus className="w-5 h-5" />
                             </button>
 
+                            {/* Hiển thị số lượng */}
                             <span className="px-6 py-2 bg-slate-800 rounded-lg text-lg font-medium">
                                 {quantity}
                             </span>
 
+                            {/* Tăng số lượng */}
                             <button
-                                onClick={() => setQuantity((q) => q + 1)}
+                                onClick={() =>
+                                    setQuantity((q) =>
+                                        BookDetail?.quantity ? Math.min(BookDetail.quantity, q + 1) : q + 1
+                                    )
+                                }
                                 className="bg-slate-700 p-3 rounded-full hover:bg-slate-600 hover:scale-110 transition"
                             >
                                 <Plus className="w-5 h-5" />
                             </button>
 
+                            {/* Nút mượn sách */}
                             <button className="ml-6 flex items-center gap-3 bg-yellow-400 text-slate-900 font-bold px-8 py-3 rounded-xl shadow-md hover:bg-yellow-500 hover:scale-105 transition">
-                                <ShoppingCart className="w-6 h-6" /> Mượn Sáchs
+                                <ShoppingCart className="w-6 h-6" /> Mượn Sách
                             </button>
                         </div>
+
                     </div>
                 </div>
 
