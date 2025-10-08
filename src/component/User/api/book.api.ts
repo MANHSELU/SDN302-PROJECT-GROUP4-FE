@@ -3,5 +3,7 @@ const APIBook = {
   getBook: `${portApi}/api/user/notcheck/filterPaginated`,
   getCategorylimit: `${portApi}/api/user/notcheck/category`,
   getNewBook: `${portApi}/api/user/notcheck/newBook`,
+  getSlotTime: `${portApi}/api/user/check/slottime`,
+  getBookDEtail: `${portApi}/api/user/notcheck/books`,
 };
 export default APIBook;

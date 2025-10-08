@@ -114,6 +114,7 @@ export default function AllBooks() {
                                     alt={book.title}
                                     className="w-full h-56 object-cover"
                                 />
+<<<<<<< HEAD
                                 <button
                                     className="absolute top-2 right-2 bg-black/40 p-1 rounded-full"
                                 >
@@ -130,6 +131,22 @@ export default function AllBooks() {
                                 </button>
                             </div>
 
+=======
+
+                                <button
+                                    type="button"
+                                    className="absolute top-2 right-2 bg-black/40 p-1 rounded-full flex items-center justify-center group"
+                                >
+                                    {/* Trái tim viền xám */}
+                                    <HeartOutline className="w-5 h-5 text-gray-300 group-hover:hidden transition-colors duration-200" />
+
+                                    {/* Trái tim full đỏ (hiện khi hover) */}
+                                    <LiaHeartSolid className="w-5 h-5 text-red-500 hidden group-hover:block transition-colors duration-200" />
+                                </button>
+                            </div>
+
+
+>>>>>>> son
                             {/* Nội dung sách */}
                             <div className="p-3">
                                 <p className="font-semibold text-sm line-clamp-2">{book.title}</p>
