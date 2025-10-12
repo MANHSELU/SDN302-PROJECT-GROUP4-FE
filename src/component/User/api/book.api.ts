@@ -5,5 +5,6 @@ const APIBook = {
   getNewBook: `${portApi}/api/user/notcheck/newBook`,
   getSlotTime: `${portApi}/api/user/check/slottime`,
   getBookDEtail: `${portApi}/api/user/notcheck/books`,
+  postBook: `${portApi}/api/user/check/borrowBook`,
 };
 export default APIBook;

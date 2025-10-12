@@ -4,6 +4,7 @@ import APIAuthor from "../../api/author.api";
 import { useDispatch } from "react-redux";
 import { getUer } from "../../../../redux/action/action";
 import type { Users } from "../../../../model/User";
+import Swal from "sweetalert2";
 
 function ProfilePage() {
   const dispatch = useDispatch();
@@ -58,11 +59,27 @@ function ProfilePage() {
       body: form,
     });
     const data = await res.json();
-    if (!res.ok) return alert(data.message || "Cập nhật thất bại");
+    if (!res.ok) {
+      Swal.fire({
+        position: "center",
+        icon: "error",
+        title: data.message || "Có lỗi xảy ra",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      return;
+    }
+
     setMe(data.data);
     setPreviewAvatar(null); // reset preview để hiển thị link server
     dispatch(getUer(data.data));
-    alert("Cập nhật hồ sơ thành công");
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: data.message || "Có lỗi xảy ra",
+      showConfirmButton: false,
+      timer: 1500,
+    });
   };
 
   // Submit đổi mật khẩu
@@ -78,11 +95,26 @@ function ProfilePage() {
       body: JSON.stringify({ oldPassword, newPassword, confirmNewPassword }),
     });
     const data = await res.json();
-    if (!res.ok) return alert(data.message || "Đổi mật khẩu thất bại");
+    if (!res.ok) {
+      Swal.fire({
+        position: "center",
+        icon: "error",
+        title: data.message || "Có lỗi xảy ra",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      return;
+    }
     setOldPassword("");
     setNewPassword("");
     setConfirmNewPassword("");
-    alert("Đổi mật khẩu thành công");
+    Swal.fire({
+      position: "center",
+      icon: "success",
+      title: data.message || "Có lỗi xảy ra",
+      showConfirmButton: false,
+      timer: 1500,
+    });
   };
 
   return (

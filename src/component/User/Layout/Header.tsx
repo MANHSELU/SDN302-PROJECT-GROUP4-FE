@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom"
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom"
 import {
     BookOpen,
     Home,
@@ -8,6 +8,8 @@ import {
     LogOut,
     Bell,
     Mail,
+    Table,
+    Heart,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type allReducers from "../../../redux/reducer/Redux";
@@ -57,13 +59,16 @@ function Header() {
 
                 <nav className="flex flex-col gap-2 text-slate-300 w-full mt-4">
                     {[
-                        { icon: Home, label: "Trang chủ" },
-                        { icon: Book, label: "Sách" },
-                        { icon: User, label: "Người dùng" },
-                        { icon: Phone, label: "Liên hệ" },
-                        { icon: LogOut, label: "Đăng xuất" },
-                    ].map(({ icon: Icon, label }) => (
-                        <div
+                        { icon: Home, label: "Trang chủ", href: "" },
+                        { icon: Book, label: "Sách", href: "/book" },
+                        { icon: User, label: "Người dùng", href: "/profile" },
+                        { icon: Table, label: "Đặt Bàn", href: "/bookingtable" },
+                        { icon: BookOpen, label: "Sách đã mượn", href: "/borrowhistory" },
+                        { icon: Heart, label: "Sách yêu thích", href: "/favoritebooks" },
+                        { icon: Phone, label: "Liên hệ", href: "" },
+                        { icon: LogOut, label: "Đăng xuất", href: "" },
+                    ].map(({ icon: Icon, label, href }) => (
+                        <Link to={href}
                             key={label}
                             className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 cursor-pointer transition-all duration-300"
                         >
@@ -74,7 +79,7 @@ function Header() {
                             <span className="hidden group-hover:inline text-sm whitespace-nowrap">
                                 {label}
                             </span>
-                        </div>
+                        </Link>
                     ))}
                 </nav>
             </aside>
@@ -117,14 +122,17 @@ function Header() {
                                 <Mail className="h-5 w-5 text-slate-300 hover:text-white cursor-pointer" />
                                 <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-yellow-400"></span>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <img
-                                    src="https://i.pravatar.cc/40"
-                                    alt="user"
-                                    className="h-9 w-9 rounded-full border-2 border-yellow-400"
-                                />
-                                <span className="font-medium">{user.fullname}</span>
-                            </div>
+                            <Link to={"/profile"}>
+                                <div className="flex items-center gap-2">
+                                    <img
+                                        src={user.avatar}
+                                        alt="user"
+                                        className="h-9 w-9 rounded-full border-2 border-yellow-400"
+                                    />
+                                    <span className="font-medium">{user.fullname}</span>
+                                </div>
+                            </Link>
+
                         </div>) : (
                         <div className="flex items-center gap-4">
                             {/* Nút Đăng nhập */}
