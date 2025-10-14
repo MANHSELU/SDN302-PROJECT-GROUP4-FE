@@ -10,8 +10,6 @@ import ProfilePage from './component/User/Layout/Profile/ProfilePage'
 import BookDetail from './component/User/Layout/BookDetail/BookDetail'
 import FavoriteBooks from './component/User/Layout/FavoriteBooks/FavoriteBooks'
 import BorrowHistory from './component/User/Layout/BorrowHistory/BorrowHistory'
-import BookingTablePage from './component/User/Layout/BookingTable/BookingTablePage'
-
 function App() {
 
   return (
@@ -51,17 +49,6 @@ function App() {
             element={
               <>
                 <ProfilePage />
-                <Footer />
-              </>
-            }
-          />
-          <Route
-
-            path="/bookingtable"
-            element={
-              <>
-                <BookingTablePage
-                />
                 <Footer />
               </>
             }
