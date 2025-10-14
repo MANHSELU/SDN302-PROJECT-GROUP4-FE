@@ -5,29 +5,12 @@ import "sweetalert2/src/sweetalert2.scss";
 import { useNavigate } from "react-router-dom";
 import type { Books } from "../../../../model/Books";
 import APIBookLibrarian from "../../api/book.api";
-// import { Editor } from "@tinymce/tinymce-react"; // nếu bạn dùng TinyMCE thì mở dòng này
+import type { Author } from "../../../../model/Author";
+import type { Category } from "../../../../model/Category";
 
 const SanphamList: React.FC = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
-    // State cho sản phẩm mới
-    // const [books, setBooks] = useState<Books>({
-    //     _id: "",
-    //     image: [],
-    //     title: "",
-    //     price: null,
-    //     quantity: null,
-    //     decription: "",
-    //     published_year: "",
-    //     categori_id: [],
-    //     shelf: null,
-    //     row: null,
-    //     column: null,
-    //     status: "inactive",
-    //     slug: "",
-    //     authors: { name: "", image_author: "", bio: "" },
-    // } as Books);
-
 
     const [isOpen, setIsOpen] = useState(false);
     const [sanphamlist, setSanphamlist] = useState<Books[]>([]);
@@ -36,6 +19,46 @@ const SanphamList: React.FC = () => {
     const [keySearch, setKeySearch] = useState("");
     const [images, setImages] = useState<File[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    // tác giả và thể loại 
+    const [authorList, setAuthorList] = useState<Author[]>([])
+    const [categoryList, setCategoryList] = useState<Category[]>([])
+    // gọi đến lấy dữ liệu của 
+    useEffect(() => {
+        if (!token) return; // nếu chưa đăng nhập thì không gọi API
+
+        fetch(APIBookLibrarian.getCategory, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then((data) => setCategoryList(data.data))
+            .catch((err) => console.error("Lỗi khi gọi danh sách thể loại:", err));
+    }, [token]);
+    console.log("thể loại là : ", categoryList)
+    useEffect(() => {
+        if (!token) return;
+
+        fetch(APIBookLibrarian.getAuthor, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then((res) => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            })
+            .then((data) => setAuthorList(data.data))
+            .catch((err) => console.error("Lỗi khi gọi danh sách tác giả:", err));
+    }, [token]);
+    console.log("tác giả là : ", authorList)
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -84,18 +107,19 @@ const SanphamList: React.FC = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         const formData = new FormData();
-        formData.append("tittleInput", (document.getElementById("title") as HTMLInputElement).value);
-        formData.append("quantityInput", (document.getElementById("quantity") as HTMLInputElement).value);
-        formData.append("published_yearInput", (document.getElementById("published-year") as HTMLInputElement).value);
-        formData.append("categoryInput", (document.getElementById("category") as HTMLInputElement).value);
-        formData.append("authorsInput", (document.getElementById("authors") as HTMLInputElement).value);
-        formData.append("shelfInput", (document.getElementById("shelf") as HTMLInputElement).value);
-        formData.append("rowInput", (document.getElementById("row") as HTMLInputElement).value);
-        formData.append("columnInput", (document.getElementById("column") as HTMLInputElement).value);
-        formData.append("priceInput", (document.getElementById("price") as HTMLInputElement).value);
-        formData.append("descriptionInput", (document.getElementById("description") as HTMLInputElement).value);
+
+        formData.append("tittleInput", (document.getElementById("tittleInput") as HTMLInputElement).value);
+        formData.append("quantityInput", (document.getElementById("quantityInput") as HTMLInputElement).value);
+        formData.append("published_yearInput", (document.getElementById("published_yearInput") as HTMLInputElement).value);
+        formData.append("categoryInput", (document.getElementById("categoryInput") as HTMLInputElement).value);
+        formData.append("authorsInput", (document.getElementById("authorsInput") as HTMLInputElement).value);
+        formData.append("shelfInput", (document.getElementById("shelfInput") as HTMLInputElement).value);
+        formData.append("rowInput", (document.getElementById("rowInput") as HTMLInputElement).value);
+        formData.append("columnInput", (document.getElementById("columnInput") as HTMLInputElement).value);
+        formData.append("priceInput", (document.getElementById("priceInput") as HTMLInputElement).value);
+        formData.append("descriptionInput", (document.getElementById("descriptionInput") as HTMLTextAreaElement).value);
+
 
         images.forEach((img) => {
             formData.append("images", img);
@@ -105,7 +129,7 @@ const SanphamList: React.FC = () => {
             console.log(`${key}:`, value);
         }
 
-        fetch("http://localhost:5001/admin/createproduct", {
+        fetch(APIBookLibrarian.addBook, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -282,71 +306,119 @@ const SanphamList: React.FC = () => {
                             <div className="md:col-span-9 grid grid-cols-2 gap-x-6 gap-y-5">
                                 <input
                                     type="text"
-                                    id="title"
+                                    id="tittleInput"
+                                    name="tittleInput"
                                     placeholder="📖 Tên sách"
-                                    className="col-span-2 bg-gray-800/70 text-gray-100 placeholder-gray-400 h-12 px-4 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none transition-all duration-200"
+                                    className="col-span-2 bg-gray-800/70 text-gray-100 placeholder-gray-400 h-12 px-4 
+               rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 
+               outline-none transition-all duration-200"
                                 />
+
                                 <input
                                     type="number"
-                                    id="quantity"
+                                    id="quantityInput"
+                                    name="quantityInput"
                                     placeholder="📦 Số lượng"
-                                    className="bg-gray-800/70 text-gray-100 placeholder-gray-400 h-12 px-4 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none transition-all duration-200"
+                                    className="bg-gray-800/70 text-gray-100 placeholder-gray-400 h-12 px-4 
+               rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 
+               outline-none transition-all duration-200"
                                 />
+
                                 <input
                                     type="text"
-                                    id="published-year"
+                                    id="published_yearInput"
+                                    name="published_yearInput"
                                     placeholder="📅 Năm xuất bản"
-                                    className="bg-gray-800/70 text-gray-100 placeholder-gray-400 h-12 px-4 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none transition-all duration-200"
+                                    className="bg-gray-800/70 text-gray-100 placeholder-gray-400 h-12 px-4 
+               rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 
+               outline-none transition-all duration-200"
                                 />
-                                <input
-                                    type="text"
-                                    id="category"
-                                    placeholder="🏷️ Thể loại"
-                                    className="bg-gray-800/70 text-gray-100 placeholder-gray-400 h-12 px-4 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none transition-all duration-200"
-                                />
-                                <input
-                                    type="text"
-                                    id="authors"
-                                    placeholder="✍️ Tác giả"
-                                    className="bg-gray-800/70 text-gray-100 placeholder-gray-400 h-12 px-4 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none transition-all duration-200"
-                                />
+
+                                <select
+                                    id="categoryInput"
+                                    name="categoryInput"
+                                    className="bg-gray-800/70 text-white h-12 px-4 rounded-lg border border-gray-700 
+             focus:ring-2 focus:ring-teal-500 outline-none transition-all duration-200"
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled style={{ color: "#aaa" }}>
+                                        🏷️ Chọn thể loại
+                                    </option>
+                                    {categoryList.map((cat) => (
+                                        <option
+                                            key={cat._id}
+                                            value={cat._id}
+                                            style={{ backgroundColor: "#1f2937", color: "white" }} // ép màu cho option
+                                        >
+                                            {cat.title ?? cat.title}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <select
+                                    id="authorsInput"
+                                    name="authorsInput"
+                                    className="bg-gray-800/70 text-white h-12 px-4 rounded-lg border border-gray-700 
+             focus:ring-2 focus:ring-teal-500 outline-none transition-all duration-200"
+                                    defaultValue=""
+                                >
+                                    <option value="" disabled style={{ color: "#aaa" }}>
+                                        ✍️ Chọn tác giả
+                                    </option>
+                                    {authorList.map((author) => (
+                                        <option
+                                            key={author._id}
+                                            value={author._id}
+                                            style={{ backgroundColor: "#1f2937", color: "white" }}
+                                        >
+                                            {author.name}
+                                        </option>
+                                    ))}
+                                </select>
+
+
                             </div>
+
                         </div>
 
                         {/* Field phụ */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10">
                             <input
                                 type="text"
-                                id="shelf"
+                                id="shelfInput"
+                                name="shelfInput"
                                 placeholder="🗄️ Kệ"
                                 className="bg-gray-800/70 text-gray-100 placeholder-gray-400 p-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none"
                             />
                             <input
                                 type="text"
-                                id="row"
+                                id="rowInput"
+                                name="rowInput"
                                 placeholder="📚 Hàng"
                                 className="bg-gray-800/70 text-gray-100 placeholder-gray-400 p-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none"
                             />
                             <input
                                 type="text"
-                                id="column"
+                                id="columnInput"
+                                name="columnInput"
                                 placeholder="🧩 Cột"
                                 className="bg-gray-800/70 text-gray-100 placeholder-gray-400 p-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none"
                             />
                             <input
                                 type="number"
-                                id="price"
+                                id="priceInput"
+                                name="priceInput"
                                 placeholder="💰 Giá"
                                 className="bg-gray-800/70 text-gray-100 placeholder-gray-400 p-3 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none"
                             />
                         </div>
 
-                        {/* Mô tả */}
                         <textarea
-                            id="description"
+                            id="descriptionInput"
+                            name="descriptionInput"
                             placeholder="📝 Mô tả sách"
                             className="bg-gray-800/70 text-gray-100 placeholder-gray-400 w-full h-40 p-4 mt-10 rounded-lg border border-gray-700 focus:ring-2 focus:ring-teal-500 outline-none resize-none"
-                        ></textarea>
+                        />
 
                         {/* Nút hành động */}
                         <div className="flex justify-end gap-4 mt-10 pt-6 border-t border-gray-700">
@@ -470,6 +542,7 @@ const SanphamList: React.FC = () => {
                                 <th className="p-3 text-left">Mô tả</th>
                                 <th className="p-3 text-left">Giá</th>
                                 <th className="p-3 text-left">Tác giả</th>
+                                <th className="p-3 text-left">Ảnh</th>
                                 <th className="p-3 text-left">Trạng thái</th>
                                 <th className="p-3 text-left">Hành động</th>
                             </tr>
@@ -491,6 +564,19 @@ const SanphamList: React.FC = () => {
                                         {item.price ? `${item.price.toLocaleString()} ₫` : "—"}
                                     </td>
                                     <td className="p-3">{item.authors?.name}</td>
+                                    <td className="p-3">
+                                        {item.image && item.image.length > 0 ? (
+                                            <img
+                                                src={item.image[0]}
+                                                alt={item.title}
+                                                className="w-20 h-20 object-cover rounded-lg border border-gray-300 shadow-sm"
+                                            />
+                                        ) : (
+                                            <span className="text-gray-400 italic">Không có ảnh</span>
+                                        )}
+                                    </td>
+
+
                                     <td className="p-3">
                                         <button
                                             className={`px-3 py-1 rounded ${item.status === "active"
