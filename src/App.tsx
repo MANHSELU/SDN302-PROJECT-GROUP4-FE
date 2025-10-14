@@ -11,6 +11,11 @@ import BookDetail from './component/User/Layout/BookDetail/BookDetail'
 import FavoriteBooks from './component/User/Layout/FavoriteBooks/FavoriteBooks'
 import BorrowHistory from './component/User/Layout/BorrowHistory/BorrowHistory'
 import BookingTablePage from './component/User/Layout/BookingTable/BookingTablePage'
+import LoginLibrarian from './component/Librarian/Layout/Login/Login'
+import HeaderLibrarian from './component/Librarian/Layout/Header'
+import HomeLibrarian from './component/Librarian/Layout/home/home'
+import SanphamList from './component/Librarian/Layout/AllBook/AllBook'
+import TableList from './component/Librarian/Layout/BookingTable/BookingTablePage'
 function App() {
 
   return (
@@ -85,8 +90,54 @@ function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+
         </Route>
-      </Routes>
+        <Route
+          path="/LoginLibrarian"
+          element={
+            <>
+              <LoginLibrarian
+              />
+            </>
+          }
+        />
+        <Route
+          path="/librarian"
+          element={
+            <>
+              <HeaderLibrarian
+              />
+            </>
+          }
+        >
+          <Route
+            path="home"
+            element={
+              <>
+                <HomeLibrarian />
+              </>
+            }
+          />
+          <Route
+            path="getallbook"
+            element={
+              <>
+                <SanphamList />
+              </>
+            }
+          />
+          <Route
+            path="getalltable"
+            element={
+              <>
+                <TableList />
+              </>
+            }
+          />
+        </Route>
+
+      </Routes >
     </>
   )
 }
