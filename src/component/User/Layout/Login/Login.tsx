@@ -33,7 +33,13 @@ export default function Login() {
             })
                 .then((res) => {
                     if (!res.ok) {
+<<<<<<< HEAD
                         setErrorMessage("Email hoặc mật khẩu bị sai")
+=======
+                        console.log("chạy vào chết")
+                        setErrorMessage("Email hoặc mật khẩu bị sai")
+                        return;
+>>>>>>> son
                     }
                     return res.json();
                 })
@@ -55,11 +61,17 @@ export default function Login() {
                         .catch((err) => {
                             console.error("Lỗi khi lấy thông tin người dùng:", err);
                         });
+<<<<<<< HEAD
                     navigator("/");
                 })
                 .catch((error) => {
                     console.error("Lỗi khi đăng nhập:", error.message);
                     alert("Đăng nhập không thành công!");
+=======
+                })
+                .catch((error) => {
+                    console.error("Lỗi khi đăng nhập:", error.message);
+>>>>>>> son
                 });
         } catch (err) {
             if (err instanceof ValidationError) {

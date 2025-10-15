@@ -72,4 +72,7 @@ function ProfilePage() {
   );
 }
 
+<<<<<<< HEAD
+export default ProfilePage;
+=======
 export default ProfilePage;

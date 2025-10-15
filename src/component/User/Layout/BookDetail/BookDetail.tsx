@@ -82,7 +82,7 @@ function BookDetail() {
                 </div>
 
                 {/* Đánh giá */}
-                <div className="mt-16 bg-slate-800/90 p-8 rounded-2xl shadow-xl">
+                <div className="mt-16 bg-slate-800/90 p-8 rounded-2xl shadow-xl" >
                     <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
                         <span className="flex items-center gap-1 text-yellow-400 text-2xl font-bold">
                             5 <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
@@ -113,8 +113,8 @@ function BookDetail() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 

@@ -1,21 +1,21 @@
 export interface Books {
-  _id: string;
+  _id?: string;
   title: string;
-  quantity: number;
-  slug: string;
-  authors: {
+  quantity?: number | null;
+  slug?: string;
+  authors?: {
     name: string;
     image_author: string;
     bio: string;
-  }; // Tác giả
-  published_year: string; // Năm xuất bản (string vì bạn lưu "2020")
-  decription: string; // Mô tả (lưu ý bạn đang viết thiếu chữ 's')
-  date: string; // Ngày (ISO string)
-  image: string[]; // Danh sách URL ảnh
-  categori_id: string[]; // Danh sách id thể loại
-  shelf: number; // Kệ
-  row: number; // Hàng
-  column: number; // Cột
-  price: number; // Giá
-  status: "active" | "inactive"; // Trạng thái
+  };
+  published_year?: string | null;
+  decription?: string | null;
+  date?: string;
+  image: string[];
+  categori_id: string[];
+  shelf?: number | null;
+  row?: number | null;
+  column?: number | null;
+  price?: number | null;
+  status?: "active" | "inactive" | "";
 }
