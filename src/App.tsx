@@ -12,6 +12,9 @@ import FavoriteBooks from './component/User/Layout/FavoriteBooks/FavoriteBooks'
 import BorrowHistory from './component/User/Layout/BorrowHistory/BorrowHistory'
 import AddBookForm from './component/User/Layout/AddBook/AddBook'
 import ViewAllBooksForm from './component/User/Layout/AddBook/ViewAllBooks'
+import ChatPage from './component/User/Layout/ChatPage/ChatPage'
+import LoginLibrarian from './component/Librarian/Layout/Login/Login'
+import ChatPageLibrarian from './component/Librarian/Layout/ChatPage/chatPage'
 function App() {
 
   return (
@@ -78,9 +81,17 @@ function App() {
           <Route path="/ViewAllBooks" element={<ViewAllBooksForm/>}/>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/chatPage" element={<ChatPage />} />
+
+
+
+
         </Route>
+        
+          <Route path="/loginLibrarian" element={<LoginLibrarian/>} />
+          <Route path="/chatPageLibrarian" element={<ChatPageLibrarian/>}/>
       </Routes>
-    </>
+    </> 
   )
 }
 

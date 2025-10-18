@@ -71,8 +71,4 @@ function ProfilePage() {
     </div>
   );
 }
-
-<<<<<<< HEAD
-export default ProfilePage;
-=======
 export default ProfilePage;
