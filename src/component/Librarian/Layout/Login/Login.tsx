@@ -55,7 +55,7 @@ export default function LoginLibrarian() {
             const profileData = await profileRes.json();
             console.log("profile Data là : ", profileData)
             dispatch(getUer(profileData.data));
-            navigate("/librarian");
+            navigate("/librarian/home");
         } catch (err) {
             if (err instanceof ValidationError) {
                 setErrorMessage("Vui lòng nhập đúng email và mật khẩu");
