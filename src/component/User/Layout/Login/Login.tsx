@@ -29,48 +29,55 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const SubmitLogin = async () => {
     try {
+      // ✅ Kiểm tra hợp lệ form
       await userSchema.validate(login, { abortEarly: false });
       console.log("✅ Form hợp lệ:", login);
-      fetch(APIAuthor.getLogin, {
-        method: "POST", // Nếu bạn đang đăng nhập thì cần dùng POST
+
+      // ✅ Gửi yêu cầu đăng nhập
+      const res = await fetch(APIAuthor.getLogin, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(login),
+      });
+
+      if (!res.ok) {
+        setErrorMessage("Email hoặc mật khẩu bị sai");
+        return;
+      }
+
+      const data = await res.json();
+      console.log("Dữ liệu login:", data);
+
+      // ✅ Lưu token
+      const token = data?.response?.access_Token;
+      if (!token) {
+        setErrorMessage("Không nhận được token từ server");
+        return;
+      }
+      localStorage.setItem("token", token);
+
+      // ✅ Lấy thông tin user
+      const profileRes = await fetch(APIAuthor.profileUser, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          email: login.email,
-          password: login.password,
-        }),
-      })
-        .then((res) => {
-          if (!res.ok) {
-            console.log("chạy vào chết");
-            setErrorMessage("Email hoặc mật khẩu bị sai");
-            return;
-          }
-          return res.json();
-        })
-        .then((data) => {
-          console.log(data);
-          localStorage.setItem("token", data.response.access_Token);
-          fetch(APIAuthor.profileUser, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${data.response.access_Token}`,
-            },
-          })
-            .then((res) => res.json())
-            .then((profileData) => {
-              dispatch(getUer(profileData.data));
-              navigator("/");
-            })
-            .catch((err) => {
-              console.error("Lỗi khi lấy thông tin người dùng:", err);
-            });
-        })
-        .catch((error) => {
-          console.error("Lỗi khi đăng nhập:", error.message);
-        });
+      });
+
+      if (!profileRes.ok) {
+        throw new Error("Không thể lấy thông tin người dùng");
+      }
+
+      const profileData = await profileRes.json();
+      console.log("user khi login là :", profileData.data);
+
+      // ✅ Cập nhật Redux
+      dispatch(getUer(profileData.data));
+
+      // ✅ Sau khi Redux cập nhật xong, mới điều hướng
+      navigator("/");
+
     } catch (err) {
       if (err instanceof ValidationError) {
         err.inner.forEach((e) => {
@@ -79,10 +86,11 @@ export default function Login() {
         setErrorMessage("Email hoặc mật khẩu không đúng");
       } else {
         console.error("❌ Lỗi khác:", err);
-        setErrorMessage("Email hoặc mật khẩu không đúng");
+        setErrorMessage("Đăng nhập thất bại, vui lòng thử lại");
       }
     }
   };
+
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-slate-900"

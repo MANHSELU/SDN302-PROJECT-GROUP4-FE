@@ -27,6 +27,7 @@ function Header() {
   const users = useSelector(
     (state: ReturnType<typeof allReducers>) => state.getuser.user
   );
+  console.log("user đã đăng nhập là : ", user)
   useEffect(() => {
     if (!token || token == null) return;
     if (Object.keys(users).length === 0 || !users) {
