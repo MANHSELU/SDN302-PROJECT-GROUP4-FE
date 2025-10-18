@@ -16,6 +16,7 @@ import HeaderLibrarian from './component/Librarian/Layout/Header'
 import HomeLibrarian from './component/Librarian/Layout/home/home'
 import SanphamList from './component/Librarian/Layout/AllBook/AllBook'
 import TableList from './component/Librarian/Layout/BookingTable/BookingTablePage'
+import TableListBorrow from './component/Librarian/Layout/BorrowTableHistory/BorrowHistory'
 function App() {
 
   return (
@@ -132,6 +133,14 @@ function App() {
             element={
               <>
                 <TableList />
+              </>
+            }
+          />
+          <Route
+            path="tableListBorrow"
+            element={
+              <>
+                <TableListBorrow />
               </>
             }
           />

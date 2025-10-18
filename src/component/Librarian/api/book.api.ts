@@ -7,5 +7,6 @@ const APIBookLibrarian = {
   addBook: `${portApi}/api/librarian/check/addNewBooks`,
   getCategory: `${portApi}/api/librarian/check/category`,
   getAuthor: `${portApi}/api/librarian/check/getauthor`,
+  chanegBoook: `${portApi}/api/librarian/check/changebook`,
 };
 export default APIBookLibrarian;
