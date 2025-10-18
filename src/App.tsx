@@ -17,6 +17,7 @@ import HomeLibrarian from './component/Librarian/Layout/home/home'
 import SanphamList from './component/Librarian/Layout/AllBook/AllBook'
 import TableList from './component/Librarian/Layout/BookingTable/BookingTablePage'
 import TableListBorrow from './component/Librarian/Layout/BorrowTableHistory/BorrowHistory'
+
 function App() {
 
   return (
@@ -61,16 +62,6 @@ function App() {
             }
           />
           <Route
-            path="/bookingtable"
-            element={
-              <>
-                <BookingTablePage
-                />
-                <Footer />
-              </>
-            }
-          />
-          <Route
             path="/favoritebooks"
             element={
               <>
@@ -91,7 +82,6 @@ function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
 
         </Route>
         <Route
@@ -144,9 +134,9 @@ function App() {
               </>
             }
           />
-        </Route>
 
-      </Routes >
+        </Route>
+      </Routes>
     </>
   )
 }
