@@ -1,12 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ShoppingCart, Minus, Plus, Star } from "lucide-react";
 import { useParams } from "react-router-dom";
+import type { Books } from "../../../../model/Books";
+import APIBook from "../../api/book.api";
 
 function BookDetail() {
   const [quantity, setQuantity] = useState(1);
   const { slug } = useParams();
   console.log("slug là : ", slug);
-
+  const [bookDetail, SetBookDetail] = useState<Books | null>()
+  useEffect(() => {
+    fetch(`${APIBook.getBookDEtail}/${slug}`)
+      .then(res => res.json())
+      .then(data => SetBookDetail(data))
+      .catch(err => console.log("lỗi trong chương trình là : ", err))
+  }, [slug])
+  console.log("book detail trong chương trình là : ", bookDetail)
   return (
     <div
       className="relative min-h-screen bg-cover bg-center text-slate-100 p-12 flex justify-center"
@@ -29,31 +38,44 @@ function BookDetail() {
               📖 Chi Tiết Sách
             </h1>
 
-            <div className="w-full h-96 bg-slate-700 rounded-xl mb-6 shadow-lg"></div>
+            {bookDetail?.image?.[0] && (
+              <img
+                src={bookDetail.image[0]}
+                alt="Book main image"
+                className="w-full h-96 rounded-xl mb-6 shadow-lg object-cover"
+              />
+            )}
+
             <div className="flex gap-4">
-              {[1, 2, 3, 4].map((i) => (
+              {bookDetail && bookDetail.image?.map((i, index) => (
                 <div
-                  key={i}
-                  className="w-28 h-24 bg-slate-700 rounded-lg shadow-md hover:scale-105 transition-transform"
-                ></div>
+                  key={index}
+                  className="w-28 h-24 rounded-lg shadow-md overflow-hidden hover:scale-105 transition-transform"
+                >
+                  <img
+                    src={i}
+                    alt={`Book image ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               ))}
+
             </div>
           </div>
 
           {/* Thông tin sách */}
           <div className="flex flex-col justify-start mt-20">
             <h2 className="text-4xl font-bold mb-4 text-yellow-400">
-              Tiêu đề Sách
+              {bookDetail && bookDetail.title}
             </h2>
             <p className="text-slate-300 mb-6 text-lg leading-relaxed">
-              Đây là mô tả ngắn về sách. Nội dung thú vị, hấp dẫn, và mang tính
-              học thuật cao.
+              {bookDetail && bookDetail.decription}
             </p>
 
             <p className="text-xl font-medium mb-8">
               Giá:{" "}
               <span className="text-4xl font-extrabold text-yellow-400">
-                100.000.000 VND
+                {bookDetail && bookDetail.price}
               </span>
             </p>
 
@@ -104,9 +126,8 @@ function BookDetail() {
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star
                     key={i}
-                    className={`w-6 h-6 ${
-                      i <= 3 ? "fill-yellow-400" : "text-slate-500"
-                    }`}
+                    className={`w-6 h-6 ${i <= 3 ? "fill-yellow-400" : "text-slate-500"
+                      }`}
                   />
                 ))}
               </div>
