@@ -6,16 +6,69 @@ import APIBook from "../../api/book.api";
 
 function BookDetail() {
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(false);
   const { slug } = useParams();
-  console.log("slug là : ", slug);
-  const [bookDetail, SetBookDetail] = useState<Books | null>()
+  const [bookDetail, setBookDetail] = useState<Books | null>(null);
+
+  // 🟡 Lấy token từ localStorage
+  const token = localStorage.getItem("token");
+
+  // 🟢 Gọi API lấy chi tiết sách
   useEffect(() => {
+    if (!slug) return;
     fetch(`${APIBook.getBookDEtail}/${slug}`)
-      .then(res => res.json())
-      .then(data => SetBookDetail(data))
-      .catch(err => console.log("lỗi trong chương trình là : ", err))
-  }, [slug])
-  console.log("book detail trong chương trình là : ", bookDetail)
+      .then((res) => res.json())
+      .then((data) => setBookDetail(data))
+      .catch((err) => console.log("Lỗi khi lấy chi tiết sách:", err));
+  }, [slug]);
+
+  console.log("📚 Book detail:", bookDetail);
+
+  // 🟠 Hàm mượn sách
+  const handleMuonSach = async (bookId?: string) => {
+    if (!bookId) {
+      alert("❌ Không tìm thấy mã sách!");
+      return;
+    }
+
+    if (!token) {
+      alert("⚠️ Bạn cần đăng nhập để mượn sách!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch(APIBook.postBook, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          bookId: bookId,
+          quantityInput: quantity,
+          slug: slug,
+          language: "vn",
+        }),
+      });
+
+      const data = await res.json();
+      console.log("📦 Phản hồi từ server:", data);
+
+      if (res.ok && data.url) {
+        alert("✅ Mượn sách thành công! Hệ thống sẽ chuyển đến trang thanh toán VNPay.");
+        window.location.href = data.url; // ✅ điều hướng tới trang thanh toán
+      } else {
+        alert(`❌ Lỗi: ${data.message || "Không thể mượn sách"}`);
+      }
+    } catch (err) {
+      console.error("🚨 Lỗi khi gửi yêu cầu mượn sách:", err);
+      alert("⚠️ Kết nối thất bại, vui lòng thử lại sau!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div
       className="relative min-h-screen bg-cover bg-center text-slate-100 p-12 flex justify-center"
@@ -29,57 +82,46 @@ function BookDetail() {
 
       {/* Nội dung */}
       <div className="relative z-10 w-full max-w-6xl">
-        {/* Header */}
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 bg-slate-800/90 p-8 rounded-2xl shadow-xl">
           {/* Ảnh sách */}
           <div>
-            <h1 className="text-3xl font-bold mb-10 text-center">
-              📖 Chi Tiết Sách
-            </h1>
+            <h1 className="text-3xl font-bold mb-10 text-center">📖 Chi Tiết Sách</h1>
 
             {bookDetail?.image?.[0] && (
               <img
                 src={bookDetail.image[0]}
-                alt="Book main image"
+                alt="Book main"
                 className="w-full h-96 rounded-xl mb-6 shadow-lg object-cover"
               />
             )}
 
             <div className="flex gap-4">
-              {bookDetail && bookDetail.image?.map((i, index) => (
+              {bookDetail?.image?.map((img, index) => (
                 <div
                   key={index}
                   className="w-28 h-24 rounded-lg shadow-md overflow-hidden hover:scale-105 transition-transform"
                 >
-                  <img
-                    src={i}
-                    alt={`Book image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={img} alt={`Book ${index + 1}`} className="w-full h-full object-cover" />
                 </div>
               ))}
-
             </div>
           </div>
 
           {/* Thông tin sách */}
           <div className="flex flex-col justify-start mt-20">
-            <h2 className="text-4xl font-bold mb-4 text-yellow-400">
-              {bookDetail && bookDetail.title}
-            </h2>
+            <h2 className="text-4xl font-bold mb-4 text-yellow-400">{bookDetail?.title}</h2>
             <p className="text-slate-300 mb-6 text-lg leading-relaxed">
-              {bookDetail && bookDetail.decription}
+              {bookDetail?.decription}
             </p>
 
             <p className="text-xl font-medium mb-8">
               Giá:{" "}
               <span className="text-4xl font-extrabold text-yellow-400">
-                {bookDetail && bookDetail.price}
+                {bookDetail?.price} ₫
               </span>
             </p>
 
-            {/* Số lượng + Mua */}
+            {/* Số lượng + Mượn */}
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -99,8 +141,20 @@ function BookDetail() {
                 <Plus className="w-5 h-5" />
               </button>
 
-              <button className="ml-6 flex items-center gap-3 bg-yellow-400 text-slate-900 font-bold px-8 py-3 rounded-xl shadow-md hover:bg-yellow-500 hover:scale-105 transition">
-                <ShoppingCart className="w-6 h-6" /> Mượn Sách
+              <button
+                disabled={loading}
+                onClick={() => handleMuonSach(bookDetail?._id)}
+                className={`ml-6 flex items-center gap-3 font-bold px-8 py-3 rounded-xl shadow-md transition
+                  ${loading
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-yellow-400 text-slate-900 hover:bg-yellow-500 hover:scale-105"
+                  }`}
+              >
+                {loading ? "Đang mượn..." : (
+                  <>
+                    <ShoppingCart className="w-6 h-6" /> Mượn Sách
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -116,18 +170,15 @@ function BookDetail() {
           </h3>
 
           <div className="flex gap-6 items-start">
-            {/* Avatar user */}
             <div className="w-16 h-16 rounded-full bg-slate-600"></div>
 
-            {/* Nội dung đánh giá */}
             <div className="flex-1">
               <p className="font-semibold text-lg">Tên user</p>
               <div className="flex items-center text-yellow-400 mb-3">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star
                     key={i}
-                    className={`w-6 h-6 ${i <= 3 ? "fill-yellow-400" : "text-slate-500"
-                      }`}
+                    className={`w-6 h-6 ${i <= 3 ? "fill-yellow-400" : "text-slate-500"}`}
                   />
                 ))}
               </div>

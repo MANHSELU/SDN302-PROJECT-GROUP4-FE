@@ -5,6 +5,7 @@ import APIBook from "../../api/book.api";
 import type { Books } from "../../../../model/Books";
 import { LiaHeartSolid } from "react-icons/lia";
 import { Link } from "react-router-dom";
+import { authFetch } from "../../useCustomer/authFetch";
 
 export default function AllBooks() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,19 +20,40 @@ export default function AllBooks() {
   // Favourite
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-    fetch(APIBook.getFavourite, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setFavouriteIds(
-          data.data.map((f: { book: Books }) => f.book._id ?? "")
-        );
-      })
-      .catch(() => setFavouriteIds([]));
+    async function fetchFavouriteBooks() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const res = await authFetch(APIBook.getFavourite, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        // Nếu token hết hạn và refreshToken cũng hết → authFetch đã logout
+        if (!res) return;
+
+        // parse kết quả
+        const data = await res.json();
+
+        if (data?.data && Array.isArray(data.data)) {
+          setFavouriteIds(
+            data.data.map((f: { book: Books }) => f.book?._id ?? "")
+          );
+        } else {
+          setFavouriteIds([]);
+        }
+      } catch (err) {
+        console.error("❌ Lỗi khi gọi API yêu thích:", err);
+        setFavouriteIds([]);
+      }
+    }
+
+    fetchFavouriteBooks();
   }, []);
+
   //add khi nhan vao tim
   const handleAddFavourite = async (bookId: string) => {
     try {
@@ -83,13 +105,11 @@ export default function AllBooks() {
   // Lấy danh sách sách theo trang + category
   useEffect(() => {
     setLoading(true);
-    const url = `${APIBook.getBook}?page=${currentPage}${
-      search ? `&keyword=${encodeURIComponent(search)}` : ""
-    }${
-      selectedCategory
+    const url = `${APIBook.getBook}?page=${currentPage}${search ? `&keyword=${encodeURIComponent(search)}` : ""
+      }${selectedCategory
         ? `&categoryTitle=${encodeURIComponent(selectedCategory)}`
         : ""
-    }`;
+      }`;
 
     fetch(url)
       .then((res) => res.json())
@@ -144,11 +164,10 @@ export default function AllBooks() {
             setSelectedCategory("");
             setCurrentPage(1);
           }}
-          className={`px-4 py-1 rounded-full transition ${
-            selectedCategory === ""
-              ? "bg-yellow-500 text-black"
-              : "bg-slate-800 text-gray-300 hover:bg-yellow-500 hover:text-black"
-          }`}
+          className={`px-4 py-1 rounded-full transition ${selectedCategory === ""
+            ? "bg-yellow-500 text-black"
+            : "bg-slate-800 text-gray-300 hover:bg-yellow-500 hover:text-black"
+            }`}
         >
           Tất cả
         </button>
@@ -159,11 +178,10 @@ export default function AllBooks() {
               setSelectedCategory(cat.title);
               setCurrentPage(1);
             }}
-            className={`px-4 py-1 rounded-full transition ${
-              selectedCategory === cat.title
-                ? "bg-yellow-500 text-black"
-                : "bg-slate-800 text-gray-300 hover:bg-yellow-500 hover:text-black"
-            }`}
+            className={`px-4 py-1 rounded-full transition ${selectedCategory === cat.title
+              ? "bg-yellow-500 text-black"
+              : "bg-slate-800 text-gray-300 hover:bg-yellow-500 hover:text-black"
+              }`}
           >
             {cat.title}
           </button>
@@ -261,11 +279,10 @@ export default function AllBooks() {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === i + 1
-                      ? "bg-yellow-500 text-black"
-                      : "bg-slate-800 text-gray-300 hover:bg-slate-700"
-                  }`}
+                  className={`px-3 py-1 rounded ${currentPage === i + 1
+                    ? "bg-yellow-500 text-black"
+                    : "bg-slate-800 text-gray-300 hover:bg-slate-700"
+                    }`}
                 >
                   {i + 1}
                 </button>

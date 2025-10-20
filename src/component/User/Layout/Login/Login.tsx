@@ -50,12 +50,15 @@ export default function Login() {
 
       // ✅ Lưu token
       const token = data?.response?.access_Token;
-      if (!token) {
+      const refreshToken = data?.response?.refresh_token;
+      console.log("token:", token);
+      console.log("refreshToken:", refreshToken);
+      if (!token || !refreshToken) {
         setErrorMessage("Không nhận được token từ server");
         return;
       }
       localStorage.setItem("token", token);
-
+      localStorage.setItem("refreshToken", refreshToken)
       // ✅ Lấy thông tin user
       const profileRes = await fetch(APIAuthor.profileUser, {
         method: "GET",
