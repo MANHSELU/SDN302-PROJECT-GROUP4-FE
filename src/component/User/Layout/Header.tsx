@@ -18,6 +18,7 @@ import type { Users } from "../../../model/User";
 import APIAuthor from "../api/author.api";
 import { getUer } from "../../../redux/action/action";
 import { LogIn, UserPlus } from "lucide-react";
+import { authFetch } from "../useCustomer/authFetch";
 
 function Header() {
   const navigator = useNavigate();
@@ -27,28 +28,26 @@ function Header() {
   const users = useSelector(
     (state: ReturnType<typeof allReducers>) => state.getuser.user
   );
+  console.log("user đã đăng nhập là : ", user)
   useEffect(() => {
-    if (!token || token == null) return;
-    if (Object.keys(users).length === 0 || !users) {
-      fetch(APIAuthor.profileUser, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
+    if (!token) return;
+
+    // Nếu chưa có user thì gọi API lấy thông tin
+    if (!users || Object.keys(users).length === 0) {
+      authFetch(APIAuthor.profileUser)
+        .then((res) => {
+          if (!res) return; // Nếu bị logout trong authFetch
+          return res.json();
+        })
         .then((data) => {
+          if (!data?.data) return;
           setUser(data.data);
           dispatch(getUer(data.data));
         })
-        .catch((error) => {
-          console.error("Lỗi khi gọi API:", error);
-        });
-    } else if (Object.keys(users).length !== 0) {
-      setUser(users as Users);
+        .catch((err) => console.error("Lỗi khi gọi API:", err));
     }
   }, [token, users, dispatch]);
+
   return (
     <div className="h-screen w-screen flex bg-slate-900 text-slate-100 overflow-hidden">
       {/* Sidebar */}

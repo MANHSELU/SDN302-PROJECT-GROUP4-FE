@@ -16,7 +16,8 @@ import HeaderLibrarian from './component/Librarian/Layout/Header'
 import HomeLibrarian from './component/Librarian/Layout/home/home'
 import SanphamList from './component/Librarian/Layout/AllBook/AllBook'
 import TableList from './component/Librarian/Layout/BookingTable/BookingTablePage'
-import TableListBorrow from './component/Librarian/Layout/BorrowTableHistory/BorrowHistory'
+import ListBookOrder from './component/Librarian/Layout/ListTableOrders/ListBookOrders'
+import BookListBorrow from './component/Librarian/Layout/BookListBorrowHistory/BorrowHistory'
 
 function App() {
 
@@ -43,6 +44,15 @@ function App() {
             }
           />
 
+          <Route
+            path="/bookingtable"
+            element={
+              <>
+                <BookingTablePage />
+                <Footer />
+              </>
+            }
+          />
           <Route
             path="/bookdetail/:slug"
             element={
@@ -102,6 +112,15 @@ function App() {
             </>
           }
         >
+
+          <Route
+            path="bookinglist/table"
+            element={
+              <>
+                <ListBookOrder />
+              </>
+            }
+          />
           <Route
             path="home"
             element={
@@ -130,7 +149,7 @@ function App() {
             path="tableListBorrow"
             element={
               <>
-                <TableListBorrow />
+                <BookListBorrow />
               </>
             }
           />

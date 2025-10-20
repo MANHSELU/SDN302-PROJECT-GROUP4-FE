@@ -5,6 +5,6 @@ const APITableLibranrian = {
   deleteTable: `${portApi}/api/librarian/check/tables`,
   updateTable: `${portApi}/api/librarian/check/tables`,
   chanegTable: `${portApi}/api/librarian/check/tableschange`,
-  listBookOrders: `${portApi}/api/librarian/check/orders/books`,
+  ListOderTable: `${portApi}/api/librarian/check/orders/tables`,
 };
 export default APITableLibranrian;
