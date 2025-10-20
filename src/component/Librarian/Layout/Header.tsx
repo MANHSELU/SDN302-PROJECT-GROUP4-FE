@@ -8,7 +8,7 @@ import {
     Bell,
     Mail,
     Table,
-    Heart,
+
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type allReducers from "../../../redux/reducer/Redux";
@@ -63,8 +63,8 @@ function HeaderLibrarian() {
                         { icon: Home, label: "Trang chủ", href: "/librarian/home" },
                         { icon: Book, label: "Quản lý sách", href: "/librarian/getallbook" },
                         { icon: Table, label: "Quản lý bàn", href: "/librarian/getAlltable" },
-                        { icon: BookOpen, label: "Sách đã mượn", href: "/borrowhistory" },
-                        { icon: Heart, label: "Sách yêu thích", href: "/favoritebooks" },
+                        { icon: BookOpen, label: "Quản lý đặt lịch Đặt sách", href: "/librarian/tableListBorrow" },
+                        { icon: Table, label: "Quản lý danh sách đặt bàn", href: "/librarian/bookinglist/table" },
                         { icon: Phone, label: "Liên hệ", href: "" },
                         { icon: LogOut, label: "Đăng xuất", href: "" },
                     ].map(({ icon: Icon, label, href }) => (

@@ -6,5 +6,9 @@ const APIBook = {
   getSlotTime: `${portApi}/api/user/check/slottime`,
   getBookDEtail: `${portApi}/api/user/notcheck/books`,
   postBook: `${portApi}/api/user/check/borrowBook`,
+  getFavourite: `${portApi}/api/user/check/favourite`,
+  addFavourite: `${portApi}/api/user/check/favourite`,
+  removeFavourite: (bookId: string) =>
+    `${portApi}/api/user/check/favourite/${bookId}`,
 };
 export default APIBook;
