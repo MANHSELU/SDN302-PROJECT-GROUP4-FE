@@ -10,5 +10,7 @@ const APIBook = {
   addFavourite: `${portApi}/api/user/check/favourite`,
   removeFavourite: (bookId: string) =>
     `${portApi}/api/user/check/favourite/${bookId}`,
+  getOrderBook: `${portApi}/api/user/check/orderbook`,
 };
+
 export default APIBook;

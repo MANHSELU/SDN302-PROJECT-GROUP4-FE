@@ -7,6 +7,7 @@ import {
   Phone,
   LogOut,
   Bell,
+  ClipboardList,
   Mail,
   Table,
   Heart,
@@ -28,7 +29,7 @@ function Header() {
   const users = useSelector(
     (state: ReturnType<typeof allReducers>) => state.getuser.user
   );
-  console.log("user đã đăng nhập là : ", user)
+  console.log("user đã đăng nhập là : ", user);
   useEffect(() => {
     if (!token) return;
 
@@ -66,6 +67,11 @@ function Header() {
             { icon: Book, label: "Sách", href: "/book" },
             { icon: User, label: "Người dùng", href: "/profile" },
             { icon: Table, label: "Đặt Bàn", href: "/bookingtable" },
+            {
+              icon: ClipboardList,
+              label: "Lịch sử đặt bàn",
+              href: "/ordertable",
+            },
             { icon: BookOpen, label: "Sách đã mượn", href: "/borrowhistory" },
             { icon: Heart, label: "Sách yêu thích", href: "/favoritebooks" },
             { icon: Phone, label: "Liên hệ", href: "" },

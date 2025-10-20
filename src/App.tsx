@@ -1,29 +1,28 @@
-import { Route, Routes } from 'react-router-dom'
-import Header from './component/User/Layout/Header'
-import LibraryDashboard from './component/User/Layout/home/home'
-import "./App.css"
-import Login from './component/User/Layout/Login/Login'
-import Footer from './component/User/Layout/Footer'
-import Register from './component/User/Layout/Register/Register'
-import AllBooks from './component/User/Layout/AllBook/AllBook'
-import ProfilePage from './component/User/Layout/Profile/ProfilePage'
-import BookDetail from './component/User/Layout/BookDetail/BookDetail'
-import FavoriteBooks from './component/User/Layout/FavoriteBooks/FavoriteBooks'
-import BorrowHistory from './component/User/Layout/BorrowHistory/BorrowHistory'
-
-import ChatPage from './component/User/Layout/ChatPage/ChatPage'
-import ChatPageLibrarian from './component/Librarian/Layout/ChatPage/chatPage'
-import BookingTablePage from './component/User/Layout/BookingTable/BookingTablePage'
-import LoginLibrarian from './component/Librarian/Layout/Login/Login'
-import HeaderLibrarian from './component/Librarian/Layout/Header'
-import HomeLibrarian from './component/Librarian/Layout/home/home'
-import SanphamList from './component/Librarian/Layout/AllBook/AllBook'
-import TableList from './component/Librarian/Layout/BookingTable/BookingTablePage'
-import ListBookOrder from './component/Librarian/Layout/ListTableOrders/ListBookOrders'
-import BookListBorrow from './component/Librarian/Layout/BookListBorrowHistory/BorrowHistory'
+import { Route, Routes } from "react-router-dom";
+import Header from "./component/User/Layout/Header";
+import LibraryDashboard from "./component/User/Layout/home/home";
+import "./App.css";
+import Login from "./component/User/Layout/Login/Login";
+import Footer from "./component/User/Layout/Footer";
+import Register from "./component/User/Layout/Register/Register";
+import AllBooks from "./component/User/Layout/AllBook/AllBook";
+import ProfilePage from "./component/User/Layout/Profile/ProfilePage";
+import BookDetail from "./component/User/Layout/BookDetail/BookDetail";
+import FavoriteBooks from "./component/User/Layout/FavoriteBooks/FavoriteBooks";
+import BorrowHistory from "./component/User/Layout/BorrowHistory/BorrowHistory";
+import OrderTablePage from "./component/User/Layout/OrderTablePage/OrderTablePage";
+import ChatPage from "./component/User/Layout/ChatPage/ChatPage";
+import ChatPageLibrarian from "./component/Librarian/Layout/ChatPage/chatPage";
+import BookingTablePage from "./component/User/Layout/BookingTable/BookingTablePage";
+import LoginLibrarian from "./component/Librarian/Layout/Login/Login";
+import HeaderLibrarian from "./component/Librarian/Layout/Header";
+import HomeLibrarian from "./component/Librarian/Layout/home/home";
+import SanphamList from "./component/Librarian/Layout/AllBook/AllBook";
+import TableList from "./component/Librarian/Layout/BookingTable/BookingTablePage";
+import ListBookOrder from "./component/Librarian/Layout/ListTableOrders/ListBookOrders";
+import BookListBorrow from "./component/Librarian/Layout/BookListBorrowHistory/BorrowHistory";
 
 function App() {
-
   return (
     <>
       <Routes>
@@ -66,6 +65,15 @@ function App() {
             }
           />
           <Route
+            path="/ordertable"
+            element={
+              <>
+                <OrderTablePage />
+                <Footer />
+              </>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <>
@@ -82,13 +90,12 @@ function App() {
                 <Footer />
               </>
             }
-          />   
+          />
           <Route
             path="/borrowhistory"
             element={
               <>
-                <BorrowHistory
-                />
+                <BorrowHistory />
                 <Footer />
               </>
             }
@@ -101,8 +108,7 @@ function App() {
           path="/LoginLibrarian"
           element={
             <>
-              <LoginLibrarian
-              />
+              <LoginLibrarian />
             </>
           }
         />
@@ -110,12 +116,10 @@ function App() {
           path="/librarian"
           element={
             <>
-              <HeaderLibrarian
-              />
+              <HeaderLibrarian />
             </>
           }
         >
-
           <Route
             path="bookinglist/table"
             element={
@@ -157,11 +161,11 @@ function App() {
             }
           />
         </Route>
-          <Route path="/loginLibrarian" element={<LoginLibrarian/>} />
-          <Route path="/chatPageLibrarian" element={<ChatPageLibrarian/>}/>
+        <Route path="/loginLibrarian" element={<LoginLibrarian />} />
+        <Route path="/chatPageLibrarian" element={<ChatPageLibrarian />} />
       </Routes>
-    </> 
-  )
+    </>
+  );
 }
 
-export default App
+export default App;
