@@ -10,6 +10,9 @@ import ProfilePage from './component/User/Layout/Profile/ProfilePage'
 import BookDetail from './component/User/Layout/BookDetail/BookDetail'
 import FavoriteBooks from './component/User/Layout/FavoriteBooks/FavoriteBooks'
 import BorrowHistory from './component/User/Layout/BorrowHistory/BorrowHistory'
+
+import ChatPage from './component/User/Layout/ChatPage/ChatPage'
+import ChatPageLibrarian from './component/Librarian/Layout/ChatPage/chatPage'
 import BookingTablePage from './component/User/Layout/BookingTable/BookingTablePage'
 import LoginLibrarian from './component/Librarian/Layout/Login/Login'
 import HeaderLibrarian from './component/Librarian/Layout/Header'
@@ -79,7 +82,7 @@ function App() {
                 <Footer />
               </>
             }
-          />
+          />   
           <Route
             path="/borrowhistory"
             element={
@@ -92,7 +95,7 @@ function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
+          <Route path="/chatPage" element={<ChatPage />} />
         </Route>
         <Route
           path="/LoginLibrarian"
@@ -153,10 +156,11 @@ function App() {
               </>
             }
           />
-
         </Route>
+          <Route path="/loginLibrarian" element={<LoginLibrarian/>} />
+          <Route path="/chatPageLibrarian" element={<ChatPageLibrarian/>}/>
       </Routes>
-    </>
+    </> 
   )
 }
 
