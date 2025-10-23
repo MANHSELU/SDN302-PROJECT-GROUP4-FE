@@ -13,8 +13,16 @@ import BorrowHistory from './component/User/Layout/BorrowHistory/BorrowHistory'
 import AddBookForm from './component/User/Layout/AddBook/AddBook'
 import ViewAllBooksForm from './component/User/Layout/AddBook/ViewAllBooks'
 import ChatPage from './component/User/Layout/ChatPage/ChatPage'
-import LoginLibrarian from './component/Librarian/Layout/Login/Login'
 import ChatPageLibrarian from './component/Librarian/Layout/ChatPage/chatPage'
+import BookingTablePage from './component/User/Layout/BookingTable/BookingTablePage'
+import LoginLibrarian from './component/Librarian/Layout/Login/Login'
+import HeaderLibrarian from './component/Librarian/Layout/Header'
+import HomeLibrarian from './component/Librarian/Layout/home/home'
+import SanphamList from './component/Librarian/Layout/AllBook/AllBook'
+import TableList from './component/Librarian/Layout/BookingTable/BookingTablePage'
+import ListBookOrder from './component/Librarian/Layout/ListTableOrders/ListBookOrders'
+import BookListBorrow from './component/Librarian/Layout/BookListBorrowHistory/BorrowHistory'
+
 import UserManagement from './component/Admin/Layout/AllUsers/AllUsers'
 import Dashboard from './component/Admin/Layout/DashboardHome/Dashboard'
 
@@ -38,6 +46,16 @@ function App() {
             element={
               <>
                 <AllBooks />
+                <Footer />
+              </>
+            }
+          />
+
+          <Route
+            path="/bookingtable"
+            element={
+              <>
+                <BookingTablePage />
                 <Footer />
               </>
             }
@@ -83,6 +101,68 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/chatPage" element={<ChatPage />} />
         </Route>
+        <Route
+          path="/LoginLibrarian"
+          element={
+            <>
+              <LoginLibrarian
+              />
+            </>
+          }
+        />
+        <Route
+          path="/librarian"
+          element={
+            <>
+              <HeaderLibrarian
+              />
+            </>
+          }
+        >
+
+          <Route
+            path="bookinglist/table"
+            element={
+              <>
+                <ListBookOrder />
+              </>
+            }
+          />
+          <Route
+            path="home"
+            element={
+              <>
+                <HomeLibrarian />
+              </>
+            }
+          />
+          <Route
+            path="getallbook"
+            element={
+              <>
+                <SanphamList />
+              </>
+            }
+          />
+          <Route
+            path="getalltable"
+            element={
+              <>
+                <TableList />
+              </>
+            }
+          />
+          <Route
+            path="tableListBorrow"
+            element={
+              <>
+                <BookListBorrow />
+              </>
+            }
+          />
+        </Route>
+          <Route path="/loginLibrarian" element={<LoginLibrarian/>} />
+          <Route path="/chatPageLibrarian" element={<ChatPageLibrarian/>}/>
 
         <Route path="/AddBook" element={<AddBookForm />} />
         <Route path="/loginLibrarian" element={<LoginLibrarian />} />

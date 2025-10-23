@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import "sweetalert2/src/sweetalert2.scss";
-import { useNavigate } from "react-router-dom";
 import Modal from "react-modal"; // ✅ import react-modal
 import type { Table } from "../../../../model/Table";
 import APITableLibranrian from "../../api/table.api";
@@ -10,14 +9,15 @@ import APITableLibranrian from "../../api/table.api";
 Modal.setAppElement("#root");
 
 const TableList: React.FC = () => {
-    const navigate = useNavigate();
     const token = localStorage.getItem("token");
 
     const [statusFilter, setStatusFilter] = useState<string>("");
     const [tableList, setTableList] = useState<Table[]>([]);
     const [keySearch, setKeySearch] = useState("");
     const [isOpen, setIsOpen] = useState(false); // ✅ modal state
-
+    // edit table 
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [editTable, setEditTable] = useState<Table | null>(null);
     const [newTable, setNewTable] = useState({
         title: "",
         price: "",
@@ -56,8 +56,8 @@ const TableList: React.FC = () => {
 
     // ✅ Đổi trạng thái hoạt động
     const handleChangeStatus = (id: string) => {
-        fetch(`http://localhost:5001/admin/changeaction/${id}`, {
-            method: "POST",
+        fetch(`${APITableLibranrian.chanegTable}/${id}`, {
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
@@ -77,15 +77,97 @@ const TableList: React.FC = () => {
             .catch((err) => console.error("Đổi trạng thái thất bại:", err));
     };
 
-    // ✅ Sửa
-    const handleEdit = (id: string) => {
-        navigate(`/admin/detailProduct/${id}`);
+    // ✅ fill dữ liệu lên 
+    const handleEdit = async (id: string) => {
+        setIsEditOpen(true); // ✅ mở modal ngay lập tức (có thể show loading)
+        setEditTable(null);  // reset dữ liệu cũ
+
+        try {
+            const res = await fetch(`${APITableLibranrian.updateTable}/${id}`, {
+                method: "GET", // ✅ dùng GET để lấy dữ liệu chi tiết
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, // ✅ thêm token
+                },
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            // ✅ fill dữ liệu từ API vào form
+            setEditTable({
+                _id: data.data._id,
+                title: data.data.title,
+                price: data.data.price,
+                status: data.data.status as "active" | "inactive",
+            });
+
+
+        } catch (error) {
+            console.error("❌ Lỗi khi lấy dữ liệu bàn:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Không thể tải dữ liệu!",
+                text: "Vui lòng thử lại sau.",
+            });
+            setIsEditOpen(false);
+        }
+    };
+
+
+    // chỉnh sửa table 
+    const handleUpdateTable = async (e: React.FormEvent) => {
+        e.preventDefault(); // ✅ ngăn reload trang
+
+        if (!editTable) return;
+
+        try {
+            const res = await fetch(`${APITableLibranrian.updateTable}/${editTable._id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    title: editTable.title,
+                    price: editTable.price,
+                    status: editTable.status,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Cập nhật thành công!",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+
+                // ✅ cập nhật state, không reload
+                setTableList((prev) =>
+                    prev.map((t) => (t._id === editTable._id ? { ...t, ...editTable } : t))
+                );
+
+                setIsEditOpen(false);
+                setEditTable(null);
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Cập nhật thất bại!",
+                    text: data.message || "Không thể cập nhật mục này.",
+                });
+            }
+        } catch (err) {
+            console.error("❌ Lỗi khi cập nhật:", err);
+        }
     };
 
     // ✅ Xóa
     const handleDelete = async (id: string) => {
         try {
-            const res = await fetch(`http://localhost:5001/admin/sanpham/${id}`, {
+            const res = await fetch(`${APITableLibranrian.deleteTable}/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -119,7 +201,7 @@ const TableList: React.FC = () => {
     const handleAddTable = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await fetch(`http://localhost:5001/admin/table`, {
+            const res = await fetch(APITableLibranrian.addTable, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -137,7 +219,7 @@ const TableList: React.FC = () => {
                     timer: 1500,
                     showConfirmButton: false,
                 });
-                setTableList((prev) => [...prev, data]);
+                setTableList((prev) => [...prev, data.data]);
                 setIsOpen(false);
                 setNewTable({ title: "", price: "", status: "active" });
             } else {
@@ -367,7 +449,87 @@ const TableList: React.FC = () => {
                     </div>
                 </form>
             </Modal>
+            <Modal
+                isOpen={isEditOpen}
+                onRequestClose={() => setIsEditOpen(false)}
+                className="bg-gray-900 rounded-2xl shadow-2xl max-w-3xl w-full mx-auto mt-20 p-8 text-gray-100 border border-gray-700"
+                overlayClassName="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+            >
+                <h2 className="text-3xl font-semibold mb-8 text-center text-white tracking-wide border-b border-gray-700 pb-4">
+                    ✏️ Chỉnh sửa sản phẩm
+                </h2>
 
+                {editTable && (
+                    <form onSubmit={handleUpdateTable} className="space-y-6">
+                        {/* Tiêu đề */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                🏷️ Tiêu đề sản phẩm
+                            </label>
+                            <input
+                                type="text"
+                                required
+                                value={editTable.title}
+                                onChange={(e) => setEditTable({ ...editTable, title: e.target.value })}
+                                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-100 placeholder-gray-400 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all duration-200"
+                            />
+                        </div>
+
+                        {/* Giá */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                💰 Giá (VNĐ)
+                            </label>
+                            <input
+                                type="number"
+                                required
+                                min={0}
+                                value={editTable.price}
+                                onChange={(e) => setEditTable({ ...editTable, price: Number(e.target.value) })}
+                                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-100 placeholder-gray-400 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all duration-200"
+                            />
+                        </div>
+
+                        {/* Trạng thái */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                ⚙️ Trạng thái
+                            </label>
+                            <select
+                                value={editTable.status}
+                                onChange={(e) =>
+                                    setEditTable({
+                                        ...editTable,
+                                        status: e.target.value as "active" | "inactive" | "",
+                                    })
+                                }
+
+                                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-gray-100 shadow-inner focus:border-blue-500 focus:ring-2 focus:ring-blue-500 outline-none transition-all duration-200"
+                            >
+                                <option value="active">🟢 Hoạt động</option>
+                                <option value="inactive">🔴 Ngưng bán</option>
+                            </select>
+                        </div>
+
+                        {/* Nút hành động */}
+                        <div className="flex justify-end gap-3 pt-6 border-t border-gray-700 mt-8">
+                            <button
+                                type="button"
+                                onClick={() => setIsEditOpen(false)}
+                                className="px-5 py-2.5 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white transition-all duration-200"
+                            >
+                                ❌ Hủy
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-500 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-[1.03] active:scale-95 transition-all duration-200"
+                            >
+                                💾 Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </Modal>
         </div>
     );
 };

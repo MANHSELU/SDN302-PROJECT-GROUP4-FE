@@ -1,5 +1,4 @@
-
-import { NavLink, Outlet, useNavigate } from "react-router-dom"
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   BookOpen,
   Home,
@@ -9,6 +8,8 @@ import {
   LogOut,
   Bell,
   Mail,
+  Table,
+  Heart,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import type allReducers from "../../../redux/reducer/Redux";
@@ -17,55 +18,61 @@ import type { Users } from "../../../model/User";
 import APIAuthor from "../api/author.api";
 import { getUer } from "../../../redux/action/action";
 import { LogIn, UserPlus } from "lucide-react";
+import { authFetch } from "../useCustomer/authFetch";
 
 function Header() {
-
-  const navigator = useNavigate()
+  const navigator = useNavigate();
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
   const [user, setUser] = useState<Users | null>(null);
-  const users = useSelector((state: ReturnType<typeof allReducers>) => state.getuser.user);
+  const users = useSelector(
+    (state: ReturnType<typeof allReducers>) => state.getuser.user
+  );
+  console.log("user đã đăng nhập là : ", user)
   useEffect(() => {
-    if (!token || token == null) return;
-    if (Object.keys(users).length === 0 || !users) {
-      fetch(APIAuthor.profileUser, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => res.json())
+    if (!token) return;
+
+    // Nếu chưa có user thì gọi API lấy thông tin
+    if (!users || Object.keys(users).length === 0) {
+      authFetch(APIAuthor.profileUser)
+        .then((res) => {
+          if (!res) return; // Nếu bị logout trong authFetch
+          return res.json();
+        })
         .then((data) => {
+          if (!data?.data) return;
           setUser(data.data);
           dispatch(getUer(data.data));
         })
-        .catch((error) => {
-          console.error("Lỗi khi gọi API:", error);
-        });
-    } else if (Object.keys(users).length !== 0) {
-      setUser(users as Users);
+        .catch((err) => console.error("Lỗi khi gọi API:", err));
     }
   }, [token, users, dispatch]);
+
   return (
     <div className="h-screen w-screen flex bg-slate-900 text-slate-100 overflow-hidden">
       {/* Sidebar */}
-      <aside className="group fixed top-0 left-0 h-screen w-16 hover:w-56 
+      <aside
+        className="group fixed top-0 left-0 h-screen w-16 hover:w-56 
                   bg-slate-800 flex flex-col items-start py-6 gap-6 
                   transition-all duration-300 shadow-lg z-50 overflow-hidden 
-                  rounded-none group-hover:rounded-r-2xl">
+                  rounded-none group-hover:rounded-r-2xl"
+      >
         {/* Logo */}
         <BookOpen className="h-7 w-7 text-yellow-400 mx-auto transition-transform duration-300 group-hover:scale-110" />
 
         <nav className="flex flex-col gap-2 text-slate-300 w-full mt-4">
           {[
-            { icon: Home, label: "Trang chủ" },
-            { icon: Book, label: "Sách" },
-            { icon: User, label: "Người dùng" },
-            { icon: Phone, label: "Liên hệ" },
-            { icon: LogOut, label: "Đăng xuất" },
-          ].map(({ icon: Icon, label }) => (
-            <div
+            { icon: Home, label: "Trang chủ", href: "" },
+            { icon: Book, label: "Sách", href: "/book" },
+            { icon: User, label: "Người dùng", href: "/profile" },
+            { icon: Table, label: "Đặt Bàn", href: "/bookingtable" },
+            { icon: BookOpen, label: "Sách đã mượn", href: "/borrowhistory" },
+            { icon: Heart, label: "Sách yêu thích", href: "/favoritebooks" },
+            { icon: Phone, label: "Liên hệ", href: "" },
+            { icon: LogOut, label: "Đăng xuất", href: "" },
+          ].map(({ icon: Icon, label, href }) => (
+            <Link
+              to={href}
               key={label}
               className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-slate-700 cursor-pointer transition-all duration-300"
             >
@@ -76,12 +83,10 @@ function Header() {
               <span className="hidden group-hover:inline text-sm whitespace-nowrap">
                 {label}
               </span>
-            </div>
+            </Link>
           ))}
         </nav>
       </aside>
-
-
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col ml-16 group-hover:ml-56 transition-all duration-300">
@@ -98,14 +103,16 @@ function Header() {
             >
               Library
             </NavLink>
-            <NavLink to="/book" className={({ isActive }) =>
-              isActive
-                ? "text-yellow-400 font-bold border-b-2 border-yellow-400"
-                : "text-gray-300 hover:text-yellow-300"
-            }>
+            <NavLink
+              to="/book"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-yellow-400 font-bold border-b-2 border-yellow-400"
+                  : "text-gray-300 hover:text-yellow-300"
+              }
+            >
               Books
             </NavLink>
-
           </nav>
 
           <div className="flex-1" />
@@ -119,20 +126,22 @@ function Header() {
                 <Mail className="h-5 w-5 text-slate-300 hover:text-white cursor-pointer" />
                 <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-yellow-400"></span>
               </div>
-              <div className="flex items-center gap-2">
-                <img
-                  src="https://i.pravatar.cc/40"
-                  alt="user"
-                  className="h-9 w-9 rounded-full border-2 border-yellow-400"
-                />
-                <span className="font-medium">{user.fullname}</span>
-              </div>
-            </div>) : (
+              <Link to={"/profile"}>
+                <div className="flex items-center gap-2">
+                  <img
+                    src={user.avatar}
+                    alt="user"
+                    className="h-9 w-9 rounded-full border-2 border-yellow-400"
+                  />
+                  <span className="font-medium">{user.fullname}</span>
+                </div>
+              </Link>
+            </div>
+          ) : (
             <div className="flex items-center gap-4">
               {/* Nút Đăng nhập */}
               <button
                 className="flex items-center gap-2 px-6 py-2.5 
->>>>>>> son
                bg-blue-600 hover:bg-blue-700 
                text-white text-lg font-semibold 
                rounded-full shadow-md 
@@ -160,8 +169,7 @@ function Header() {
                 Đăng ký
               </button>
             </div>
-          )
-          }
+          )}
         </header>
 
         <main className="flex-1 overflow-y-auto">

@@ -40,7 +40,6 @@ const SanphamList: React.FC = () => {
             .then((data) => setCategoryList(data.data))
             .catch((err) => console.error("Lỗi khi gọi danh sách thể loại:", err));
     }, [token]);
-    console.log("thể loại là : ", categoryList)
     useEffect(() => {
         if (!token) return;
 
@@ -58,7 +57,6 @@ const SanphamList: React.FC = () => {
             .then((data) => setAuthorList(data.data))
             .catch((err) => console.error("Lỗi khi gọi danh sách tác giả:", err));
     }, [token]);
-    console.log("tác giả là : ", authorList)
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -162,7 +160,7 @@ const SanphamList: React.FC = () => {
 
     // ✅ Đổi trạng thái hoạt động
     const handleChangeStatus = (id: string) => {
-        fetch(`http://localhost:5001/admin/changeaction/${id}`, {
+        fetch(`${APIBookLibrarian.chanegBoook}/${id}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
