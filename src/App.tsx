@@ -15,11 +15,14 @@ import ViewAllBooksForm from './component/User/Layout/AddBook/ViewAllBooks'
 import ChatPage from './component/User/Layout/ChatPage/ChatPage'
 import LoginLibrarian from './component/Librarian/Layout/Login/Login'
 import ChatPageLibrarian from './component/Librarian/Layout/ChatPage/chatPage'
-function App() {
+import UserManagement from './component/Admin/Layout/AllUsers/AllUsers'
+import Dashboard from './component/Admin/Layout/DashboardHome/Dashboard'
 
+function App() {
   return (
     <>
       <Routes>
+        {/* ---------- User Section ---------- */}
         <Route element={<Header />}>
           <Route
             path="/"
@@ -39,7 +42,6 @@ function App() {
               </>
             }
           />
-
           <Route
             path="/bookdetail/:slug"
             element={
@@ -66,32 +68,31 @@ function App() {
                 <Footer />
               </>
             }
-          />   
+          />
           <Route
             path="/borrowhistory"
             element={
               <>
-                <BorrowHistory
-                />
+                <BorrowHistory />
                 <Footer />
               </>
             }
           />
-          <Route path="/AddBook" element={<AddBookForm/>}/>
-          <Route path="/ViewAllBooks" element={<ViewAllBooksForm/>}/>
+          <Route path="/ViewAllBooks" element={<ViewAllBooksForm />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/chatPage" element={<ChatPage />} />
-
-
-
-
         </Route>
-        
-          <Route path="/loginLibrarian" element={<LoginLibrarian/>} />
-          <Route path="/chatPageLibrarian" element={<ChatPageLibrarian/>}/>
+
+        <Route path="/AddBook" element={<AddBookForm />} />
+        <Route path="/loginLibrarian" element={<LoginLibrarian />} />
+        <Route path="/chatPageLibrarian" element={<ChatPageLibrarian />} />
+
+        <Route path="/GetUsers" element={<UserManagement />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
+
       </Routes>
-    </> 
+    </>
   )
 }
 

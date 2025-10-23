@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+import categories from "../../../../data/Library_System.categorys.json";
+import Authors from "../../../../data/Library_System.authors.json";
 function AddBookForm() {
   const [images, setImages] = useState<File[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -8,6 +9,8 @@ function AddBookForm() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
   const [input, setInput] = useState("");
+  const [category, setCategory] = useState("");
+  const [authors, setAuthors] = useState("");
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -42,14 +45,14 @@ function AddBookForm() {
     formData.append("tittleInput",(document.getElementById("title") as HTMLInputElement).value);
     formData.append("quantityInput",(document.getElementById("quantity") as HTMLInputElement).value);
     formData.append("published_yearInput",(document.getElementById("published-year") as HTMLInputElement).value);
-    formData.append("categoryInput",(document.getElementById("category") as HTMLInputElement).value);
-    formData.append("authorsInput",(document.getElementById("authors") as HTMLInputElement).value);
+     formData.append("categoryInput", category);
+  formData.append("authorsInput", authors);
     formData.append("shelfInput",(document.getElementById("shelf") as HTMLInputElement).value);
     formData.append("rowInput",(document.getElementById("row") as HTMLInputElement).value);
     formData.append("columnInput",(document.getElementById("column") as HTMLInputElement).value);
     formData.append("priceInput",(document.getElementById("price") as HTMLInputElement).value);
     formData.append("descriptionInput",(document.getElementById("description") as HTMLInputElement).value);
-
+    
     images.forEach((img)=>{
       formData.append("images",img);
     })
@@ -148,35 +151,50 @@ function AddBookForm() {
             <input
               type="text"
                id="title"
-              placeholder="Title"
+              placeholder="Tiêu đề sách"
               className="bg-gray-400 placeholder-gray-600 placeholder:font-bold text-gray-600 col-span-2 h-12 px-3 rounded-lg border border-gray-400 focus:ring-2 focus:ring-teal-500 outline-none"
             />
             <input
               type="number"
               id="quantity"
-              placeholder="Quantity"
+              placeholder="Số lượng"
               className="bg-gray-400 placeholder-gray-600 placeholder:font-bold text-gray-600 mt-6 h-12 px-3 rounded-lg border border-gray-400 focus:ring-2 focus:ring-teal-500 outline-none"
             />
             <input
               type="text"
               id ="published-year"
-              placeholder="Published year"
+              placeholder="Năm xuất bản"
               className="bg-gray-400 placeholder-gray-600 placeholder:font-bold text-gray-600 mt-6 h-12 px-3 rounded-lg border border-gray-400 focus:ring-2 focus:ring-teal-500 outline-none"
             />
-            <input
-              type="text"
-              id = "category"
-              placeholder="Category"
-              className="bg-gray-400 placeholder-gray-600 placeholder:font-bold text-gray-600 mt-6 h-12 px-3 rounded-lg border border-gray-400 focus:ring-2 focus:ring-teal-500 outline-none"
-            />
-            <input
-              type="text"
-              id = "authors"
-              placeholder="Authors"
-              className="bg-gray-400 placeholder-gray-600 placeholder:font-bold text-gray-600 mt-6 h-12 px-3 rounded-lg border border-gray-400 focus:ring-2 focus:ring-teal-500 outline-none"
-            />
+           <select
+        id="category"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        className="bg-gray-400 text-gray-600 font-bold mt-6 h-12 px-3 rounded-lg border border-gray-400 focus:ring-2 focus:ring-teal-500 outline-none w-full"
+      >
+        <option value="">Chọn thể loại</option>
+        {categories.map((item) => (
+          <option key={item._id.$oid} value={item._id.$oid}>
+            {item.title}
+          </option>
+        ))}
+      </select>
+       <select
+        id="authors"
+        value={authors}
+        onChange={(e) => setAuthors(e.target.value)}
+        className="bg-gray-400 text-gray-600 font-bold mt-6 h-12 px-3 rounded-lg border border-gray-400 focus:ring-2 focus:ring-teal-500 outline-none w-full"
+      >
+        <option value="">Chọn tác giả</option>
+        {Authors.map((item) => (
+          <option key={item._id.$oid} value={item._id.$oid}>
+            {item.name}
+          </option>
+        ))}
+      </select>
           </div>
         </div>
+        
 
         {/* Field phụ */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">

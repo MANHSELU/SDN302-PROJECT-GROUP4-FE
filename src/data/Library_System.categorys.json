@@ -1,0 +1,64 @@
+[{
+  "_id": {
+    "$oid": "68d6164eedbb29dd95d54236"
+  },
+  "title": "Tiểu thuyết",
+  "deleted": false,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6164eedbb29dd95d54237"
+  },
+  "title": "Khoa học",
+  "deleted": false,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6164eedbb29dd95d54238"
+  },
+  "title": "Lịch sử",
+  "deleted": false,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6164eedbb29dd95d54239"
+  },
+  "title": "Kinh tế",
+  "deleted": false,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6164eedbb29dd95d5423a"
+  },
+  "title": "Tâm lý - Kỹ năng sống",
+  "deleted": false,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6164eedbb29dd95d5423b"
+  },
+  "title": "Truyện tranh",
+  "deleted": false,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6164eedbb29dd95d5423c"
+  },
+  "title": "Sách thiếu nhi",
+  "deleted": false,
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6164eedbb29dd95d5423d"
+  },
+  "title": "Thơ ca",
+  "deleted": false,
+  "status": "active"
+}]

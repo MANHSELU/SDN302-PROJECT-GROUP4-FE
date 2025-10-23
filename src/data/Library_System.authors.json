@@ -1,0 +1,100 @@
+[{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a45ff"
+  },
+  "name": "Haruki Murakami",
+  "image_author": "https://example.com/images/murakami.jpg",
+  "bio": "Japanese writer known for works blending surrealism, magical realism, and themes of loneliness.",
+  "birthdate": "1949-01-12",
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4600"
+  },
+  "name": "J.K. Rowling",
+  "image_author": "https://example.com/images/jk_rowling.jpg",
+  "bio": "British author, best known for the Harry Potter series which became a worldwide phenomenon.",
+  "birthdate": "1965-07-31",
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4601"
+  },
+  "name": "George R.R. Martin",
+  "image_author": "https://example.com/images/george_rr_martin.jpg",
+  "bio": "American novelist, screenwriter, and creator of 'A Song of Ice and Fire', adapted into Game of Thrones.",
+  "birthdate": "1948-09-20",
+  "status": "inactive"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4602"
+  },
+  "name": "Nguyễn Nhật Ánh",
+  "image_author": "https://example.com/images/nguyen_nhat_anh.jpg",
+  "bio": "Vietnamese author known for children's and young adult literature, with works like 'Kính vạn hoa'.",
+  "birthdate": "1955-05-07",
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4603"
+  },
+  "name": "Ernest Hemingway",
+  "image_author": "https://example.com/images/hemingway.jpg",
+  "bio": "American novelist and Nobel Prize winner, famous for 'The Old Man and the Sea'.",
+  "birthdate": "1899-07-21",
+  "status": "inactive"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4604"
+  },
+  "name": "Jane Austen",
+  "image_author": "https://example.com/images/jane_austen.jpg",
+  "bio": "English novelist known for 'Pride and Prejudice' and sharp social commentary.",
+  "birthdate": "1775-12-16",
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4605"
+  },
+  "name": "F. Scott Fitzgerald",
+  "image_author": "https://example.com/images/fitzgerald.jpg",
+  "bio": "American novelist, widely regarded for 'The Great Gatsby' and his portrayal of the Jazz Age.",
+  "birthdate": "1896-09-24",
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4606"
+  },
+  "name": "Leo Tolstoy",
+  "image_author": "https://example.com/images/tolstoy.jpg",
+  "bio": "Russian author of epic novels like 'War and Peace' and 'Anna Karenina'.",
+  "birthdate": "1828-09-09",
+  "status": "inactive"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4607"
+  },
+  "name": "Mark Twain",
+  "image_author": "https://example.com/images/mark_twain.jpg",
+  "bio": "American humorist and novelist, best known for 'The Adventures of Tom Sawyer' and 'Huckleberry Finn'.",
+  "birthdate": "1835-11-30",
+  "status": "active"
+},
+{
+  "_id": {
+    "$oid": "68d6595d5b07e0c29e6a4608"
+  },
+  "name": "Gabriel García Márquez",
+  "image_author": "https://example.com/images/marquez.jpg",
+  "bio": "Colombian novelist and Nobel laureate, master of magical realism, author of 'One Hundred Years of Solitude'.",
+  "birthdate": "1927-03-06",
+  "status": "active"
+}]
