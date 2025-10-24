@@ -11,6 +11,8 @@ const APIBook = {
   removeFavourite: (bookId: string) =>
     `${portApi}/api/user/check/favourite/${bookId}`,
   getOrderBook: `${portApi}/api/user/check/orderbook`,
+  addReview: `${portApi}/api/user/check/reviewBook`,
+  getReview: `${portApi}/api/user/notcheck/reviewBook`,
 };
 
 export default APIBook;
