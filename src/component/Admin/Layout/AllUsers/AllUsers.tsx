@@ -73,6 +73,7 @@ const UserManagement: React.FC = () => {
               <tr className="bg-gray-100 text-gray-600 uppercase text-sm">
                 <th className="text-left py-3 px-4">Tên người dùng</th>
                 <th className="text-left py-3 px-4">Email</th>
+                <th className="text-left py-3 px-4">Vai trò</th>
                 <th className="text-center py-3 px-4">Trạng thái</th>
                 <th className="text-center py-3 px-4 rounded-tr-xl">Hành động</th>
               </tr>
@@ -85,6 +86,8 @@ const UserManagement: React.FC = () => {
                 >
                     <td className="py-3 px-4 font-semibold text-gray-800">{user.fullname}</td>
                   <td className="py-3 px-4 text-gray-600">{user.email}</td>
+                  <td className="py-3 px-4 text-gray-600">{user.role_id.title === "thủ thư" ? "Thủ thư" : "Người dùng"}
+</td>
                   <td
                     className={`py-3 text-center font-semibold ${
                       user.status === "active"
