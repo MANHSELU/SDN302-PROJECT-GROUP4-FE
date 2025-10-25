@@ -5,6 +5,10 @@ const APIUsers = {
   getTotalUsers: `${portApi}/admincheck/getAllTotalUser`,
   getTotalNewUsers: `${portApi}/admincheck/getTotalNewUser`,
   getRevenueDashboards: `${portApi}/admincheck/getRevenueDashboard`,
+  banUser: `${portApi}/admincheck/banUsers`,
+  unBanUser: `${portApi}/admincheck/unBanUsers`,
+
+
 
 
 };

@@ -1,30 +1,82 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Users, HomeIcon } from "lucide-react";
 import APIUsers from "../../api/getusers.api";
 
+interface Role {
+  _id: string;
+  title: string;
+}
+
+interface User {
+  _id: string;
+  fullname: string;
+  email: string;
+  status: "active" | "banned";
+  role_id: Role;
+}
+
 const UserManagement: React.FC = () => {
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState<any[]>([]);
-    // Lấy danh sách Users
-      useEffect(() => {
-        fetch(APIUsers.getAllUsers)
-          .then((res) => res.json())
-          .then((data) => setUsers(data))
-          .catch((err) => console.error(err));
-      }, []);
+  const [users, setUsers] = useState<User[]>([]);
 
+  // ✅ Lấy danh sách user
+  useEffect(() => {
+    fetch(APIUsers.getAllUsers)
+      .then((res) => res.json())
+      .then((data) => setUsers(data))
+      .catch((err) => console.error(err));
+  }, []);
 
-//   const handleToggleStatus = (id: number) => {
-//     setUsers((prev) =>
-//       prev.map((u) =>
-//         u.id === id
-//           ? { ...u, status: u.status === "active" ? "banned" : "active" }
-//           : u
-//       )
-//     );
-//   };
+  // ✅ Khóa user
+  const handleBanUser = async (id: string) => {
+    if (!window.confirm("Bạn có chắc muốn KHÓA người dùng này không?")) return;
 
+    try {
+      const res = await fetch(`${APIUsers.banUser}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "banned" }),
+      });
 
+      if (!res.ok) throw new Error("Khóa người dùng thất bại");
+
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, status: "banned" } : u))
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Có lỗi xảy ra khi khóa người dùng.");
+    }
+  };
+
+  // ✅ Mở khóa user
+  const handleUnbanUser = async (id: string) => {
+    if (!window.confirm("Bạn có chắc muốn MỞ KHÓA người dùng này không?")) return;
+
+    try {
+      const res = await fetch(`${APIUsers.unBanUser}/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "active" }),
+      });
+
+      if (!res.ok) throw new Error("Mở khóa người dùng thất bại");
+
+      setUsers((prev) =>
+        prev.map((u) => (u._id === id ? { ...u, status: "active" } : u))
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Có lỗi xảy ra khi mở khóa người dùng.");
+    }
+  };
+
+  // ✅ Lọc theo ô tìm kiếm
+  const filteredUsers = users.filter(
+    (u) =>
+      u.fullname.toLowerCase().includes(search.toLowerCase()) ||
+      u.email.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-[#0F2027] via-[#203A43] to-[#2C5364] text-gray-900">
@@ -35,7 +87,7 @@ const UserManagement: React.FC = () => {
           <nav className="space-y-4">
             <div className="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/20 transition">
               <HomeIcon size={20} />
-              <span className="text-white font-medium">Trang chủ thống kế</span>
+              <span className="text-white font-medium">Trang chủ thống kê</span>
             </div>
             <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition">
               <Users size={20} />
@@ -66,7 +118,7 @@ const UserManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* Table container */}
+        {/* Table */}
         <div className="bg-white/95 rounded-2xl shadow-2xl p-6 backdrop-blur-md border border-white/30">
           <table className="w-full border-collapse">
             <thead>
@@ -75,38 +127,45 @@ const UserManagement: React.FC = () => {
                 <th className="text-left py-3 px-4">Email</th>
                 <th className="text-left py-3 px-4">Vai trò</th>
                 <th className="text-center py-3 px-4">Trạng thái</th>
-                <th className="text-center py-3 px-4 rounded-tr-xl">Hành động</th>
+                <th className="text-center py-3 px-4">Hành động</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user: any, idx: number) => (
+              {filteredUsers.map((user) => (
                 <tr
-                  key={idx}
-                  className="border-t border-gray-700 hover:bg-[#334155] transition"
+                  key={user._id}
+                  className="border-t border-gray-700 hover:bg-[#f3f4f6] transition"
                 >
-                    <td className="py-3 px-4 font-semibold text-gray-800">{user.fullname}</td>
+                  <td className="py-3 px-4 font-semibold text-gray-800">
+                    {user.fullname}
+                  </td>
                   <td className="py-3 px-4 text-gray-600">{user.email}</td>
-                  <td className="py-3 px-4 text-gray-600">{user.role_id.title === "thủ thư" ? "Thủ thư" : "Người dùng"}
-</td>
+                  <td className="py-3 px-4 text-gray-600">
+                    {user.role_id?.title === "thủ thư" ? "Thủ thư" : "Người dùng"}
+                  </td>
                   <td
                     className={`py-3 text-center font-semibold ${
-                      user.status === "active"
-                        ? "text-green-600"
-                        : "text-red-600"
+                      user.status === "active" ? "text-green-600" : "text-red-600"
                     }`}
                   >
                     {user.status === "active" ? "Hoạt động" : "Khóa"}
                   </td>
                   <td className="py-3 text-center">
-                    <button
-                      className={`px-5 py-2 rounded-full font-semibold text-white shadow transition ${
-                        user.status === "active"
-                          ? "bg-red-500 hover:bg-red-600"
-                          : "bg-gray-500 hover:bg-gray-600"
-                      }`}
-                    >
-                      {user.status === "active" ? "Ban" : "Unban"}
-                    </button>
+                    {user.status === "active" ? (
+                      <button
+                        onClick={() => handleBanUser(user._id)}
+                        className="px-5 py-2 rounded-full font-semibold text-white bg-red-500 hover:bg-red-600 shadow transition"
+                      >
+                        Ban
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleUnbanUser(user._id)}
+                        className="px-5 py-2 rounded-full font-semibold text-white bg-green-500 hover:bg-green-600 shadow transition"
+                      >
+                        Unban
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
