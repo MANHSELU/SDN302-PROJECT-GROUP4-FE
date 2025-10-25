@@ -13,6 +13,9 @@ const APIBook = {
   getOrderBook: `${portApi}/api/user/check/orderbook`,
   addReview: `${portApi}/api/user/check/reviewBook`,
   getReview: `${portApi}/api/user/notcheck/reviewBook`,
+  editReview: `${portApi}/api/user/check/reviewBook`,
+  deleteReview: (reviewId: string) =>
+    `${portApi}/api/user/check/reviewBook/${reviewId}`,
 };
 
 export default APIBook;

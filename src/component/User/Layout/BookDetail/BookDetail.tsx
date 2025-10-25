@@ -1,17 +1,12 @@
 import { useEffect, useState } from "react";
-import {
-  ShoppingCart,
-  Minus,
-  Plus,
-  Star,
-  MessageCircle,
-  Edit2,
-  Trash2,
-} from "lucide-react";
+import { ShoppingCart, Minus, Plus, Star, Edit2, Trash2 } from "lucide-react";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import type { Books } from "../../../../model/Books";
 import type { Review } from "../../../../model/Review";
+import type { Users } from "../../../../model/User";
 import APIBook from "../../api/book.api";
+
 function BookDetail() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -20,6 +15,15 @@ function BookDetail() {
 
   // 🟡 Lấy token từ localStorage
   const token = localStorage.getItem("token");
+  // Lấy userId từ redux profile
+  const user = useSelector(
+    (state: { getuser: { user: Users } }) => state.getuser.user
+  );
+  const userId = user?._id;
+
+  // Modal xác nhận xóa review
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteReviewId, setDeleteReviewId] = useState<string | null>(null);
 
   // 🟢 Gọi API lấy chi tiết sách
   useEffect(() => {
@@ -78,7 +82,11 @@ function BookDetail() {
       setLoading(false);
     }
   };
-  // Review
+
+  // State cho review
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState<string>("");
+  const [editingRating, setEditingRating] = useState<number>(0);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewText, setReviewText] = useState<string>("");
   const [reviewLoading, setReviewLoading] = useState<boolean>(false);
@@ -90,6 +98,7 @@ function BookDetail() {
   const [showLoginReviewError, setShowLoginReviewError] = useState(false);
   const [showReviewSuccess, setShowReviewSuccess] = useState(false);
 
+  // Lấy review theo sách
   useEffect(() => {
     if (!bookDetail?._id) return;
     setReviewPageLoading(true);
@@ -119,6 +128,100 @@ function BookDetail() {
       .finally(() => setReviewPageLoading(false));
   }, [bookDetail?._id, page, token]);
 
+  // Hàm sửa review
+  const handleEditReview = async (reviewId: string) => {
+    setReviewLoading(true);
+    try {
+      const res = await fetch(APIBook.editReview, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          reviewId,
+          text: editingText,
+          rating: editingRating,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEditingReviewId(null);
+        setReviewPageLoading(true);
+        fetch(
+          `${APIBook.getReview}?bookId=${bookDetail?._id}&page=${page}&limit=5`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (Array.isArray(data.data)) {
+              setReviews(data.data);
+              setTotalPages(data.totalPages || 1);
+            } else {
+              setReviews([]);
+              setTotalPages(1);
+            }
+          })
+          .finally(() => setReviewPageLoading(false));
+      } else {
+        alert(data.message || "Lỗi sửa đánh giá");
+      }
+    } catch {
+      alert("Lỗi kết nối server!");
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  // Hàm xóa review
+  const handleDeleteReview = async (reviewId: string) => {
+    setReviewLoading(true);
+    try {
+      const res = await fetch(APIBook.deleteReview(reviewId), {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReviewPageLoading(true);
+        fetch(
+          `${APIBook.getReview}?bookId=${bookDetail?._id}&page=${page}&limit=5`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (Array.isArray(data.data)) {
+              setReviews(data.data);
+              setTotalPages(data.totalPages || 1);
+            } else {
+              setReviews([]);
+              setTotalPages(1);
+            }
+          })
+          .finally(() => setReviewPageLoading(false));
+      } else {
+        alert(data.message || "Lỗi xóa đánh giá");
+      }
+    } catch {
+      alert("Lỗi kết nối server!");
+    } finally {
+      setReviewLoading(false);
+    }
+  };
+
+  // Hàm gửi review mới
   const handleSendReview = async () => {
     if (rating === 0 || !reviewText.trim()) {
       setShowReviewError(true);
@@ -182,6 +285,7 @@ function BookDetail() {
       setReviewLoading(false);
     }
   };
+
   return (
     <>
       <div
@@ -314,7 +418,6 @@ function BookDetail() {
                 {reviewLoading ? "Đang gửi..." : "Gửi"}
               </button>
             </div>
-            {/* Hiển thị lỗi nhập thiếu hoặc chưa đăng nhập */}
             {(showReviewError || showLoginReviewError || showReviewSuccess) && (
               <div className="mb-4">
                 {showReviewError && (
@@ -364,40 +467,100 @@ function BookDetail() {
                           {r.user_id?.fullname || "Người dùng"}
                         </p>
                         <div className="flex gap-2">
+                          {/* Chỉ hiện Edit/Delete nếu là review của user hiện tại */}
+                          {userId === r.user_id._id && (
+                            <>
+                              <button
+                                className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-slate-700 text-green-400 hover:bg-slate-600 transition"
+                                title="Edit"
+                                onClick={() => {
+                                  setEditingReviewId(r._id);
+                                  setEditingText(r.text);
+                                  setEditingRating(r.rating);
+                                }}
+                              >
+                                <Edit2 size={16} /> Edit
+                              </button>
+                              <button
+                                className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-slate-700 text-red-400 hover:bg-slate-600 transition"
+                                title="Delete"
+                                onClick={() => {
+                                  setDeleteReviewId(r._id);
+                                  setShowDeleteModal(true);
+                                }}
+                              >
+                                <Trash2 size={16} /> Delete
+                              </button>
+                            </>
+                          )}
+                          {/* Nút Reply UI */}
                           <button
                             className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-slate-700 text-blue-400 hover:bg-slate-600 transition"
                             title="Reply"
                           >
-                            <MessageCircle size={16} /> Reply
-                          </button>
-                          <button
-                            className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-slate-700 text-green-400 hover:bg-slate-600 transition"
-                            title="Edit"
-                          >
-                            <Edit2 size={16} /> Edit
-                          </button>
-                          <button
-                            className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-slate-700 text-red-400 hover:bg-slate-600 transition"
-                            title="Delete"
-                          >
-                            <Trash2 size={16} /> Delete
+                            💬 Reply
                           </button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 mb-1 mt-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            size={20}
-                            color={star <= r.rating ? "#FFD700" : "#888"}
-                            fill={star <= r.rating ? "#FFD700" : "none"}
+                      {/* Nếu đang edit review này */}
+                      {editingReviewId === r._id ? (
+                        <div className="mb-2">
+                          <div className="flex items-center gap-1 mb-1 mt-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                size={20}
+                                color={
+                                  star <= editingRating ? "#FFD700" : "#888"
+                                }
+                                fill={
+                                  star <= editingRating ? "#FFD700" : "none"
+                                }
+                                className="cursor-pointer"
+                                onClick={() => setEditingRating(star)}
+                              />
+                            ))}
+                          </div>
+                          <textarea
+                            className="w-full p-2 rounded bg-slate-700 text-white mb-2"
+                            rows={2}
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
                           />
-                        ))}
-                      </div>
-                      <p className="text-slate-300 text-base mb-2">{r.text}</p>
-                      <p className="text-sm text-slate-400">
-                        {new Date(r.createdAt).toLocaleString()}
-                      </p>
+                          <button
+                            className="px-4 py-1 rounded bg-green-500 text-white mr-2"
+                            onClick={() => handleEditReview(r._id)}
+                            disabled={reviewLoading}
+                          >
+                            Lưu
+                          </button>
+                          <button
+                            className="px-4 py-1 rounded bg-gray-500 text-white"
+                            onClick={() => setEditingReviewId(null)}
+                          >
+                            Hủy
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-1 mb-1 mt-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                size={20}
+                                color={star <= r.rating ? "#FFD700" : "#888"}
+                                fill={star <= r.rating ? "#FFD700" : "none"}
+                              />
+                            ))}
+                          </div>
+                          <p className="text-slate-300 text-base mb-2">
+                            {r.text}
+                          </p>
+                          <p className="text-sm text-slate-400">
+                            {new Date(r.createdAt).toLocaleString()}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -426,10 +589,49 @@ function BookDetail() {
                 )}
               </>
             )}
+            {/* Modal xác nhận xóa review */}
+            {showDeleteModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                <div className="bg-slate-800 rounded-xl shadow-xl p-8 min-w-[350px] relative">
+                  <button
+                    className="absolute top-3 right-3 text-slate-400 hover:text-white text-xl"
+                    onClick={() => setShowDeleteModal(false)}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                  <h2 className="text-xl font-bold text-center mb-4 text-white">
+                    Xóa đánh giá?
+                  </h2>
+                  <hr className="mb-4 border-slate-600" />
+                  <p className="mb-8 text-slate-200 text-center">
+                    Bạn có chắc chắn muốn xóa đánh giá này không?
+                  </p>
+                  <div className="flex justify-end gap-4">
+                    <button
+                      className="px-5 py-2 rounded bg-slate-700 text-white hover:bg-slate-600 font-semibold"
+                      onClick={() => setShowDeleteModal(false)}
+                    >
+                      Không
+                    </button>
+                    <button
+                      className="px-5 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700"
+                      onClick={() => {
+                        if (deleteReviewId) handleDeleteReview(deleteReviewId);
+                        setShowDeleteModal(false);
+                      }}
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
     </>
   );
 }
+
 export default BookDetail;
