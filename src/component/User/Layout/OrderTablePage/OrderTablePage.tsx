@@ -1,61 +1,64 @@
 import { useEffect, useState } from "react";
-import { BookOpen, Search } from "lucide-react";
-import APIBook from "../../api/book.api";
-import type { User_Book } from "../../../../model/User_Book";
+import { Table, Search } from "lucide-react";
+import APITable from "../../api/table.api";
+import type { User_Table } from "../../../../model/User_Table";
 
-function statusColor(status: string) {
-  if (status === "returned") return "text-green-500 font-medium";
-  if (status === "active") return "text-orange-400 font-medium";
-  if (status === "pending") return "text-blue-400 font-medium";
-  if (status === "cancelled") return "text-red-500 font-medium";
-  return "text-gray-400";
+function statusColor(status?: string) {
+  if (status === "active") return "text-blue-400 font-semibold";
+  if (status === "inactive") return "text-red-500 font-semibold";
+  return "text-gray-400 font-semibold";
 }
 
-function statusLabel(status: string) {
-  if (status === "returned") return "Đã trả";
-  if (status === "active") return "Đang mượn";
-  if (status === "pending") return "Chưa lấy sách";
-  if (status === "cancelled") return "Đã huỷ";
-  return status || "Không xác định";
+function statusLabel(status?: string) {
+  if (status === "active") return "Đang sử dụng";
+  if (status === "inactive") return "Đã huỷ";
+  return "Không xác định";
 }
 
-export default function BorrowHistory() {
-  const [data, setData] = useState<User_Book[]>([]);
+export default function OrderTablePage() {
+  const [orders, setOrders] = useState<User_Table[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [inputSearch, setInputSearch] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 6;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
     setLoading(true);
-    fetch(APIBook.getOrderBook, {
+    setError("");
+    const token = localStorage.getItem("token");
+    fetch(APITable.getOrderTable, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
-      .then((res) => setData(res.data || []))
-      .catch(() => setData([]))
+      .then((data) => {
+        if (Array.isArray(data.data)) {
+          setOrders(data.data);
+        } else {
+          setOrders([]);
+        }
+      })
+      .catch(() => {
+        setError("Không thể tải dữ liệu.");
+        setOrders([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
   // Lọc theo search
-  const filteredData = data.filter((order) =>
-    order.book_id?.title?.toLowerCase().includes(search.toLowerCase())
+  const filteredOrders = orders.filter((order) =>
+    order.table_id?.title?.toLowerCase().includes(search.toLowerCase())
   );
 
   // Phân trang
-  const totalPage = Math.ceil(filteredData.length / pageSize);
-  const pagedData = filteredData.slice((page - 1) * pageSize, page * pageSize);
+  const totalPage = Math.ceil(filteredOrders.length / pageSize);
+  const pagedOrders = filteredOrders.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  );
 
-  // Số sách đã trả và đang mượn
-  const returnedCount = data.filter(
-    (order) => order.status === "returned"
-  ).length;
-  const activeCount = data.filter((order) => order.status === "active").length;
-
-  // Hàm hiển thị lại tất cả lịch sử mượn sách
+  // Hàm hiển thị lại tất cả lịch sử đặt bàn
   const handleShowAll = () => {
     setInputSearch("");
     setSearch("");
@@ -67,41 +70,23 @@ export default function BorrowHistory() {
       className="relative min-h-screen bg-cover bg-center flex items-start justify-center p-12"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=1600&q=80')",
+          "url('https://images.unsplash.com/photo-1700145872464-4beb41df93a3?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170')",
       }}
     >
       <div className="absolute inset-0 bg-black/60"></div>
-      <div className="relative z-10 w-full max-w-7xl flex gap-8">
-        {/* Sidebar - Tổng quan */}
-        <div className="bg-slate-900/85 text-white rounded-xl p-8 w-80 shadow-lg flex flex-col justify-center items-center min-h-[400px] h-[400px]">
-          <h2 className="text-3xl font-bold mb-8">Tổng quan</h2>
-          <div className="flex flex-col items-center w-full justify-center flex-1">
-            <div className="mb-8 w-full flex flex-col items-center">
-              <p className="text-7xl font-extrabold mb-2">{returnedCount}</p>
-              <p className="text-2xl font-semibold text-green-400">
-                Sách đã trả
-              </p>
-            </div>
-            <div className="w-full flex flex-col items-center">
-              <p className="text-7xl font-extrabold mb-2">{activeCount}</p>
-              <p className="text-2xl font-semibold text-orange-400">
-                Đang mượn
-              </p>
-            </div>
-          </div>
-        </div>
-        {/* Content */}
-        <div className="flex-1 bg-slate-900/80 rounded-xl p-10 shadow-lg min-h-[600px] h-[600px] flex flex-col">
+      <div className="relative z-10 w-full max-w-7xl flex justify-center">
+        {/* Content - Lịch sử đặt bàn chiếm toàn bộ chiều ngang */}
+        <div className="w-full bg-slate-900/80 rounded-xl p-10 shadow-lg min-h-[600px] h-[600px] flex flex-col">
           <h1 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
-            <BookOpen className="w-8 h-8 text-yellow-400" />
-            LỊCH SỬ MƯỢN SÁCH
+            <Table className="w-8 h-8 text-yellow-400" />
+            LỊCH SỬ ĐẶT BÀN
           </h1>
           {/* Search */}
           <div className="flex items-center bg-white rounded-lg px-3 py-2 mb-2 shadow-md">
             <Search className="text-slate-400 w-6 h-6 mr-2" />
             <input
               type="text"
-              placeholder="Tìm kiếm sách..."
+              placeholder="Tìm kiếm bàn..."
               className="flex-1 bg-transparent outline-none text-slate-800 text-lg"
               value={inputSearch}
               onChange={(e) => setInputSearch(e.target.value)}
@@ -130,48 +115,60 @@ export default function BorrowHistory() {
             <table className="w-full text-left text-slate-100 rounded-lg overflow-hidden text-lg">
               <thead>
                 <tr className="bg-slate-800 text-slate-200">
-                  <th className="px-5 py-4">Tên sách</th>
-                  <th className="px-5 py-4">Ngày mượn</th>
-                  <th className="px-5 py-4">Hạn trả</th>
+                  <th className="px-5 py-4">Tên bàn</th>
+                  <th className="px-5 py-4">Giá bàn</th>
                   <th className="px-5 py-4">Trạng thái</th>
+                  <th className="px-5 py-4">Ngày đặt</th>
+                  <th className="px-5 py-4">Khung giờ</th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={4} className="text-center py-8">
+                    <td colSpan={5} className="text-center py-8">
                       Đang tải dữ liệu...
                     </td>
                   </tr>
-                ) : pagedData.length === 0 ? (
+                ) : error ? (
                   <tr>
-                    <td colSpan={4} className="text-center py-8">
-                      Không có dữ liệu.
+                    <td colSpan={5} className="text-center py-8 text-red-400">
+                      {error}
+                    </td>
+                  </tr>
+                ) : pagedOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-8">
+                      Không có đơn đặt bàn nào.
                     </td>
                   </tr>
                 ) : (
-                  pagedData.map((order) => (
+                  pagedOrders.map((order) => (
                     <tr
                       key={order._id}
                       className="border-b border-slate-700 hover:bg-slate-800/70"
                     >
-                      <td className="px-5 py-4">{order.book_id?.title}</td>
-                      <td className="px-5 py-4">
-                        {order.borrow_date
-                          ? new Date(order.borrow_date).toLocaleDateString()
-                          : ""}
+                      <td className="px-5 py-4 font-semibold">
+                        {order.table_id?.title}
                       </td>
-                      <td className="px-5 py-4">
-                        {order.return_date
-                          ? new Date(order.return_date).toLocaleDateString()
+                      <td className="px-5 py-4 text-yellow-400 font-bold">
+                        {order.table_id?.price
+                          ? order.table_id.price.toLocaleString() + " VND"
                           : ""}
                       </td>
                       <td
                         className={`px-5 py-4 ${statusColor(
-                          order.status || ""
+                          order.table_id?.status
                         )}`}
                       >
-                        {statusLabel(order.status || "")}
+                        {statusLabel(order.table_id?.status)}
+                      </td>
+                      <td className="px-5 py-4">
+                        {order.time_date
+                          ? new Date(order.time_date).toLocaleDateString()
+                          : ""}
+                      </td>
+                      <td className="px-5 py-4">
+                        {order.time_slot?.join(", ")}
                       </td>
                     </tr>
                   ))

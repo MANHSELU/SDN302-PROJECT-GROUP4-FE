@@ -22,9 +22,11 @@ import SanphamList from './component/Librarian/Layout/AllBook/AllBook'
 import TableList from './component/Librarian/Layout/BookingTable/BookingTablePage'
 import ListBookOrder from './component/Librarian/Layout/ListTableOrders/ListBookOrders'
 import BookListBorrow from './component/Librarian/Layout/BookListBorrowHistory/BorrowHistory'
-
+import OrderTablePage from "./component/User/Layout/OrderTablePage/OrderTablePage";
 import UserManagement from './component/Admin/Layout/AllUsers/AllUsers'
 import Dashboard from './component/Admin/Layout/DashboardHome/Dashboard'
+import LibManagement from './component/Admin/Layout/AllLib/AlllLib'
+import LoginAdmin from './component/Admin/Layout/login/loginAdmin'
 
 function App() {
   return (
@@ -70,6 +72,15 @@ function App() {
             }
           />
           <Route
+            path="/ordertable"
+            element={
+              <>
+                <OrderTablePage />
+                <Footer />
+              </>
+            }
+          />
+          <Route
             path="/profile"
             element={
               <>
@@ -92,6 +103,7 @@ function App() {
             element={
               <>
                 <BorrowHistory />
+                <BorrowHistory />
                 <Footer />
               </>
             }
@@ -105,8 +117,7 @@ function App() {
           path="/LoginLibrarian"
           element={
             <>
-              <LoginLibrarian
-              />
+              <LoginLibrarian />
             </>
           }
         />
@@ -114,12 +125,10 @@ function App() {
           path="/librarian"
           element={
             <>
-              <HeaderLibrarian
-              />
+              <HeaderLibrarian />
             </>
           }
         >
-
           <Route
             path="bookinglist/table"
             element={
@@ -170,10 +179,12 @@ function App() {
 
         <Route path="/GetUsers" element={<UserManagement />} />
           <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/GetLibs" element={<LibManagement />} />
+          <Route path="/loginAdmin" element={<LoginAdmin />} />
 
       </Routes>
     </>
   )
 }
 
-export default App
+export default App;

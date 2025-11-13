@@ -93,6 +93,8 @@ const LibraryDashboard = () => {
 
   // --- YÊU THÍCH ---
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
+  const [notification, setNotification] = useState<string>("");
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -124,6 +126,8 @@ const LibraryDashboard = () => {
       });
       if (res.ok) {
         setFavouriteIds((prev) => [...prev, bookId]);
+        setNotification("Thành công thêm vào danh sách yêu thích");
+        setTimeout(() => setNotification(""), 2000);
       }
     } catch (e) {
       console.error("Add favourite error:", e);
@@ -143,6 +147,8 @@ const LibraryDashboard = () => {
       });
       if (res.ok) {
         setFavouriteIds((prev) => prev.filter((id) => id !== bookId));
+        setNotification("Thành công xóa khỏi danh sách yêu thích");
+        setTimeout(() => setNotification(""), 2000);
       }
     } catch (e) {
       console.error("Remove favourite error:", e);
@@ -151,6 +157,12 @@ const LibraryDashboard = () => {
 
   return (
     <>
+      {/* Thông báo yêu thích */}
+      {notification && (
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg z-50 transition-all duration-300">
+          {notification}
+        </div>
+      )}
       <div className="grid grid-cols-12 gap-6 p-6">
         {/* Left content 70% */}
         <div className="col-span-12 lg:col-span-8 space-y-8 px-4">

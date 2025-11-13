@@ -1,8 +1,13 @@
 import type { Users } from "./User";
+import type { Books } from "./Books";
 
 export interface User_Book {
-  _id: string; // id của user
+  _id: string;
   user_id: Users;
-  table_id: string;
-  time_slot: [string];
+  book_id: Books;
+  borrow_date?: string;
+  return_date?: string;
+  status?: string;
+  quantity?: number;
+  deleted?: boolean;
 }

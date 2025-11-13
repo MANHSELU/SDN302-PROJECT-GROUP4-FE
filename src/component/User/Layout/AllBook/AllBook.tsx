@@ -19,6 +19,9 @@ export default function AllBooks() {
 
   // Favourite
   const [favouriteIds, setFavouriteIds] = useState<string[]>([]);
+  // Thông báo
+  const [notification, setNotification] = useState<string>("");
+
   useEffect(() => {
     async function fetchFavouriteBooks() {
       const token = localStorage.getItem("token");
@@ -32,10 +35,7 @@ export default function AllBooks() {
           },
         });
 
-        // Nếu token hết hạn và refreshToken cũng hết → authFetch đã logout
         if (!res) return;
-
-        // parse kết quả
         const data = await res.json();
 
         if (data?.data && Array.isArray(data.data)) {
@@ -70,6 +70,8 @@ export default function AllBooks() {
       });
       if (res.ok) {
         setFavouriteIds((prev) => [...prev, bookId]);
+        setNotification("Thành công thêm vào danh sách yêu thích");
+        setTimeout(() => setNotification(""), 2000);
       }
     } catch (e) {
       console.error("Add favourite error:", e);
@@ -88,6 +90,8 @@ export default function AllBooks() {
       });
       if (res.ok) {
         setFavouriteIds((prev) => prev.filter((id) => id !== bookId));
+        setNotification("Thành công xóa khỏi danh sách yêu thích");
+        setTimeout(() => setNotification(""), 2000);
       }
     } catch (e) {
       console.error("Remove favourite error:", e);
@@ -105,11 +109,13 @@ export default function AllBooks() {
   // Lấy danh sách sách theo trang + category
   useEffect(() => {
     setLoading(true);
-    const url = `${APIBook.getBook}?page=${currentPage}${search ? `&keyword=${encodeURIComponent(search)}` : ""
-      }${selectedCategory
+    const url = `${APIBook.getBook}?page=${currentPage}${
+      search ? `&keyword=${encodeURIComponent(search)}` : ""
+    }${
+      selectedCategory
         ? `&categoryTitle=${encodeURIComponent(selectedCategory)}`
         : ""
-      }`;
+    }`;
 
     fetch(url)
       .then((res) => res.json())
@@ -129,6 +135,13 @@ export default function AllBooks() {
   return (
     <div className="min-h-screen bg-slate-900 text-white p-6">
       <h1 className="text-2xl font-bold mb-6">📚 Tất cả sách</h1>
+
+      {/* Thông báo yêu thích */}
+      {notification && (
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded shadow-lg z-50 transition-all duration-300">
+          {notification}
+        </div>
+      )}
 
       {/* Thanh tìm kiếm */}
       <div className="relative mb-6 max-w-lg flex">
@@ -164,10 +177,11 @@ export default function AllBooks() {
             setSelectedCategory("");
             setCurrentPage(1);
           }}
-          className={`px-4 py-1 rounded-full transition ${selectedCategory === ""
-            ? "bg-yellow-500 text-black"
-            : "bg-slate-800 text-gray-300 hover:bg-yellow-500 hover:text-black"
-            }`}
+          className={`px-4 py-1 rounded-full transition ${
+            selectedCategory === ""
+              ? "bg-yellow-500 text-black"
+              : "bg-slate-800 text-gray-300 hover:bg-yellow-500 hover:text-black"
+          }`}
         >
           Tất cả
         </button>
@@ -178,10 +192,11 @@ export default function AllBooks() {
               setSelectedCategory(cat.title);
               setCurrentPage(1);
             }}
-            className={`px-4 py-1 rounded-full transition ${selectedCategory === cat.title
-              ? "bg-yellow-500 text-black"
-              : "bg-slate-800 text-gray-300 hover:bg-yellow-500 hover:text-black"
-              }`}
+            className={`px-4 py-1 rounded-full transition ${
+              selectedCategory === cat.title
+                ? "bg-yellow-500 text-black"
+                : "bg-slate-800 text-gray-300 hover:bg-yellow-500 hover:text-black"
+            }`}
           >
             {cat.title}
           </button>
@@ -279,10 +294,11 @@ export default function AllBooks() {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`px-3 py-1 rounded ${currentPage === i + 1
-                    ? "bg-yellow-500 text-black"
-                    : "bg-slate-800 text-gray-300 hover:bg-slate-700"
-                    }`}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === i + 1
+                      ? "bg-yellow-500 text-black"
+                      : "bg-slate-800 text-gray-300 hover:bg-slate-700"
+                  }`}
                 >
                   {i + 1}
                 </button>
